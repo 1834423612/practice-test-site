@@ -39,8 +39,8 @@
                     </div>
                     <QuestionArea v-else-if="currentQuestion" :currentQuestion="currentQuestion"
                         :currentQuestionIndex="currentQuestionIndex" v-model:selectedAnswer="selectedAnswer"
-                        :showFeedback="showFeedback" :isCorrect="isCorrect" @check-answer="checkAnswer"
-                        @skip-question="skipQuestion" @next-question="nextQuestion" />
+                        :showFeedback="showFeedback" :isCorrect="isCorrect" :explanation="explanation"
+                        @check-answer="checkAnswer" @skip-question="skipQuestion" @next-question="nextQuestion" />
                 </div>
 
                 <!-- Results Page -->
@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import axios from 'axios'
 import { Icon } from '@iconify/vue'
 import Swal from 'sweetalert2'
@@ -101,6 +101,7 @@ const loading = ref(false)
 const questions = ref<Question[]>([])
 const currentQuestionIndex = ref(0)
 const selectedAnswer = ref('')
+const explanation = ref('')
 const showFeedback = ref(false)
 const isCorrect = ref(false)
 const practiceEnded = ref(false)
@@ -191,7 +192,9 @@ const loadNextQuestion = async () => {
 const checkAnswer = () => {
     const question = currentQuestion.value
     if (question.type === 'mcq') {
-        isCorrect.value = question.correct_answer.includes(selectedAnswer.value)
+        const correctAnswerIndex = question.correct_answer[0].charCodeAt(0) - 65
+        const correctAnswerId = question.answerOptions?.[correctAnswerIndex]?.id ?? ''
+        isCorrect.value = selectedAnswer.value === correctAnswerId
     } else if (question.type === 'spr') {
         isCorrect.value = question.correct_answer.some(answer => {
             const userAnswer = selectedAnswer.value.trim().toLowerCase()
@@ -200,6 +203,7 @@ const checkAnswer = () => {
         })
     }
     showFeedback.value = true
+    explanation.value = question.rationale // Use the rationale directly from the API response
     totalQuestions.value++
     if (isCorrect.value) {
         correctAnswers.value++
@@ -209,6 +213,12 @@ const checkAnswer = () => {
     updateDomainPerformance(question.domain, isCorrect.value)
     saveCompletedQuestion(question.external_id)
 }
+
+watch(currentQuestionIndex, () => {
+    isCorrect.value = false
+    showFeedback.value = false
+    selectedAnswer.value = ''
+})
 
 const nextQuestion = async () => {
     currentQuestionIndex.value++

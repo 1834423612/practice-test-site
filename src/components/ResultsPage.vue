@@ -102,16 +102,13 @@ export default defineComponent({
                 ? ((props.correctAnswers / props.totalQuestions) * 100).toFixed(2)
                 : 0
         })
-
         const formattedTotalTime = computed(() => {
             return formatTime(props.elapsedTime)
         })
-
         const formattedAvgTimePerQuestion = computed(() => {
             const avgTime = props.totalQuestions > 0 ? Math.round(props.elapsedTime / props.totalQuestions) : 0
             return formatTime(avgTime)
         })
-
         return {
             accuracy,
             formattedTotalTime,

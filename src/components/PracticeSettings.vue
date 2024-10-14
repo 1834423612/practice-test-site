@@ -4,7 +4,7 @@
 
         <!-- Step 1: Select Assessment Type -->
         <div v-if="step === 1">
-            <h3 class="text-lg font-semibold mb-4 text-gray-700">Select Assessment Type</h3>
+            <h3 class="text-lg font-semibold mb-4 text-gray-700">Select Assessment Type<sup class="text-red-600">*</sup></h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div v-for="test in assessmentTypes" :key="test.id" @click="selectAssessment(test.id)"
                     class="border rounded-lg p-4 cursor-pointer transition duration-300 hover:shadow-md"
@@ -18,7 +18,7 @@
 
         <!-- Step 2: Select Test Type -->
         <div v-if="step === 2">
-            <h3 class="text-lg font-semibold mb-4 text-gray-700">Select Test Type</h3>
+            <h3 class="text-lg font-semibold mb-4 text-gray-700">Select Test Type<sup class="text-red-600">*</sup></h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div v-for="test in testTypes" :key="test.id" @click="selectTest(test.id)"
                     class="border rounded-lg p-4 cursor-pointer transition duration-300 hover:shadow-md"
@@ -36,10 +36,11 @@
 
         <!-- Step 3: Select Domains -->
         <div v-if="step === 3">
-            <h3 class="text-lg font-semibold mb-4 text-gray-700">Select Domains</h3>
-            <div class="space-y-2">
+            <h3 class="text-lg font-semibold text-gray-700">Select Domains<sup class="text-red-600">*</sup></h3>
+            <span class="text-sm text-gray-600">Select at least one domain to start the practice.</span>
+            <div class="space-y-2 mt-4">
                 <div @click="toggleAllDomains"
-                    class="cursor-pointer text-blue-600 hover:text-blue-800 transition duration-300">
+                    class="cursor-pointer text-blue-600 font-semibold hover:text-blue-800 transition duration-300">
                     {{ selectAllDomains ? 'Deselect All' : 'Select All' }}
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -60,7 +61,7 @@
 
         <!-- Step 4: Timer Settings -->
         <div v-if="step === 4">
-            <h3 class="text-lg font-semibold mb-4 text-gray-700">Timer Settings</h3>
+            <h3 class="text-lg font-semibold mb-4 text-gray-700">Timer Settings (Optional)</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div @click="toggleTimer"
                     class="border rounded-lg p-4 cursor-pointer transition duration-300 hover:shadow-md"

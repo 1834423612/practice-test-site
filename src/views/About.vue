@@ -35,8 +35,11 @@
                     <section class="bg-yellow-50 rounded-lg p-6 shadow-sm">
                         <h2 class="text-2xl font-semibold text-yellow-700 mb-4">Question Bank Copyright</h2>
                         <p class="text-gray-700">
-                            All the questions in this website are sourced/collected from publicly available <a href="https://collegeboard.org/" target="_blank" class="text-blue-500">
-                            College Board</a> practice tests. We acknowledge and respect the copyright of College Board for these
+                            All the questions in this website are sourced/collected from publicly available <a
+                                href="https://collegeboard.org/" target="_blank"
+                                class="text-blue-500 font-semibold underline underline-offset-1">
+                                College Board</a> practice tests. We acknowledge and respect the copyright of College
+                            Board for these
                             materials.
                         </p>
                     </section>
@@ -54,6 +57,20 @@
                         </a>
                     </section>
 
+                    <section class="bg-pink-50 rounded-lg p-6 shadow-sm">
+                        <h2 class="text-2xl font-semibold text-pink-700 mb-4">About Me</h2>
+                        <p class="text-gray-700 mb-2">
+                            This practice test platform was created by kjch (AKA, Jiacheng Kuang, or Kevin). To learn more about me and my
+                            other projects, visit:
+                        </p>
+                        <p class="text-gray-700 text-sm">(CN was the original language for this website)</p>
+                        <a href="https://www.kjchmc.cn" target="_blank" rel="noopener noreferrer"
+                            class="text-blue-600 hover:underline flex items-center">
+                            <Icon icon="mdi:web" class="mr-2" />
+                            <b>kjch's Website</b>
+                        </a>
+                    </section>
+
                     <section class="bg-indigo-50 rounded-lg p-6 shadow-sm">
                         <h2 class="text-2xl font-semibold text-indigo-700 mb-4">Contact Me</h2>
                         <p class="text-gray-700 mb-2">
@@ -61,19 +78,6 @@
                         </p>
                         <p class="text-blue-600 font-semibold">admin@kjchmc.cn</p>
                         <p class="text-blue-600 font-semibold">KevinKuang2007@gmail.com</p>
-                    </section>
-
-                    <section class="bg-pink-50 rounded-lg p-6 shadow-sm">
-                        <h2 class="text-2xl font-semibold text-pink-700 mb-4">About Me</h2>
-                        <p class="text-gray-700 mb-2">
-                            This practice test platform was created by kjch. To learn more about me and my
-                            other projects, visit:
-                        </p>
-                        <a href="https://www.kjchmc.cn" target="_blank" rel="noopener noreferrer"
-                            class="text-blue-600 hover:underline flex items-center">
-                            <Icon icon="mdi:web" class="mr-2" />
-                            <b>kjch's Website</b>(CN was the original language for this website)
-                        </a>
                     </section>
                 </div>
             </div>
@@ -91,6 +95,7 @@ const features = [
     'Detailed performance analytics',
     'Progress tracking',
     'Immediate feedback',
-    'Explanations for each question'
+    'Explanations for each question',
+    '1k+ official practice questions',
 ]
 </script>

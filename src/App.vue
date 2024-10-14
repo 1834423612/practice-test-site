@@ -9,8 +9,8 @@
           </div>
           <nav>
             <ul class="flex space-x-6">
-              <li><a href="/" class="hover:text-blue-200 transition duration-300">Home</a></li>
-              <li><a href="/about" class="hover:text-blue-200 transition duration-300">About</a></li>
+              <li><a href="/" class="hover:text-blue-200 hover:underline hover:underline-offset-1 transition duration-300">Home</a></li>
+              <li><a href="/about" class="hover:text-blue-200 hover:underline hover:underline-offset-1 transition duration-300">About</a></li>
             </ul>
           </nav>
         </div>

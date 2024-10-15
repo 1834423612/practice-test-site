@@ -5,8 +5,9 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
             <a href="/" class="flex">
-              <Icon icon="lucide:book-open" class="w-8 h-8" />
+              <img src="/avatar.png" alt="Avatar" class="w-8 h-8 rounded-md mx-auto" />
               <h1 class="text-2xl font-bold ml-2">Practice Test</h1>
+              <Icon icon="lucide:book-open" class="ml-2 w-8 h-8" />
             </a>
           </div>
           <nav>

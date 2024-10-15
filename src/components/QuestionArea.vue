@@ -48,8 +48,8 @@
 
             <!-- MCQ Explanation -->
             <template v-if="currentQuestion.type === 'mcq'">
-                <div v-for="(explanation, index) in parsedMCQExplanation" :key="index"
-                    class="bg-white border rounded-lg shadow-sm p-4 transition-all duration-300" :class="{
+                <div v-for="explanation in parsedMCQExplanation" :key="explanation.letter"
+                    class="bg-white border rounded-lg shadow-sm p-4 transition-all duration-300 mb-4" :class="{
                         'border-green-500': explanation.isCorrect,
                         'border-red-500': !explanation.isCorrect && explanation.isSelected,
                         'border-gray-300': !explanation.isCorrect && !explanation.isSelected
@@ -117,28 +117,55 @@ const localSelectedAnswer = ref(props.selectedAnswer)
 const parsedMCQExplanation = computed(() => {
     if (props.currentQuestion.type !== 'mcq' || !props.explanation) return []
 
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(props.explanation, 'text/html')
-    const paragraphs = Array.from(doc.querySelectorAll('p'))
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(props.explanation, 'text/html');
+    const paragraphs = Array.from(doc.querySelectorAll('p'));
 
-    return paragraphs.map((p) => {
-        const text = p.textContent || ''
-        const choiceMatch = text.match(/^Choice ([A-D]) is/)
-        const letter = choiceMatch ? choiceMatch[1] : ''
+    // 存储每个选项的解析
+    const explanations = {
+        'A': '',
+        'B': '',
+        'C': '',
+        'D': '',
+    };
 
-        const optionId = props.currentQuestion.answerOptions.find((option: { content: string | string[]; }) =>
-            option.content.includes(`<p>${letter}.`) ||
-            option.content.includes(`<p>${letter})`)
-        )?.id
+    let currentChoice: 'A' | 'B' | 'C' | 'D' | null = null;
 
+    paragraphs.forEach((p) => {
+        const text = p.textContent || '';
+        const choiceMatch = text.match(/^Choice ([A-D])/);
+
+        if (choiceMatch) {
+            // 如果是新的选项，进行处理
+            if (currentChoice) {
+                // 检查之前的内容是否被重复插入
+                if (currentChoice && !explanations[currentChoice].includes(p.outerHTML)) {
+                    explanations[currentChoice] += '<br/>'; // 添加换行以分隔
+                }
+            }
+            currentChoice = choiceMatch[1] as 'A' | 'B' | 'C' | 'D'; // 设置当前选项
+            explanations[currentChoice] += p.outerHTML; // 追加该选项的内容
+        } else if (currentChoice) {
+            // 如果当前存在选项，则将内容追加到当前选项
+            explanations[currentChoice] += '<br/>' + p.outerHTML; // 追加其他段落内容
+        }
+    });
+
+    // 将解释构建成数组以返回
+    const allChoices: Array<'A' | 'B' | 'C' | 'D'> = ['A', 'B', 'C', 'D'];
+    const result = allChoices.map((letter: 'A' | 'B' | 'C' | 'D') => {
         return {
             letter,
-            content: p.outerHTML,
-            isCorrect: text.includes('is correct'),
-            isSelected: props.selectedAnswer === optionId
-        }
-    }).filter(explanation => explanation.letter)
-})
+            content: explanations[letter] || '<p>No explanation provided for this choice.</p>',
+            isCorrect: explanations[letter].includes('is the best answer'),
+            isSelected: props.selectedAnswer === props.currentQuestion.answerOptions.find((option: { content: string | string[]; }) =>
+                option.content.includes(`<p>${letter}.`) || option.content.includes(`<p>${letter})`)
+            )?.id,
+        };
+    });
+
+    return result;
+});
 
 watch(() => props.selectedAnswer, (newValue) => {
     localSelectedAnswer.value = newValue

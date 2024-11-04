@@ -1,0 +1,406 @@
+{
+    "problems": [
+        {
+            "id": "2023_AMC_12A_Q1",
+            "question": "Cities $\\\\mathit{A}$ and $\\\\mathit{B}$ are 45 miles apart. Alicia lives in A and Beth lives in B. Alicia bikes towards B at 18 miles per hour. Leaving at the same time, Beth bikes toward A at 12 miles per hour. How many miles from City A will they be when they meet?",
+            "options": [
+                { "label": "A", "value": "20" },
+                { "label": "B", "value": "24" },
+                { "label": "C", "value": "25" },
+                { "label": "D", "value": "26" },
+                { "label": "E", "value": "27" }
+            ],
+            "correct_option": "E",
+            "solution": [
+                "This is a $d=st$ problem, so let $x$ be the time it takes to meet. We can write the following equation: $12x + 18x = 45$. Solving gives us $x = 1.5$. The distance Alicia travels is $18 \\\\times 1.5 = 27$. Therefore, the answer is $\\\\boxed{(\\\\mathbf{E}) 27}$.",
+                "$$\\\\begin{aligned}\\\\text{The relative speed of the two is }18+12=30, \\\\text{ so } \\\\frac{3}{2} \\\\text{ hours would be required to travel } 45 \\\\text{ miles. Hence, } d = st, \\\\mathbf{ so~} x = 18 \\\\cdot \\\\frac{3}{2} = \\\\boxed{(\\\\mathbf{E})\\\\mathbf{27}}\\\\end{aligned}$$",
+                "If $x$ is the distance Beth travels, then: $$\\\\frac{3}{2}x + x = 45$$, which simplifies to $$\\\\frac{5}{2}x = 45$$ leading to $x = 18$. Therefore, Alicia travels $45 - 18 = 27$, so the solution is $\\\\boxed{(\\\\mathbf{E}) 27}$.",
+                "Alice and Barbara close in on each other at 30 mph. Since they are 45 miles apart, they will meet in $t = \\\\frac{d}{s} = \\\\frac{45 \\\\text{ miles}}{30 \\\\text{ mph}} = \\\\frac{3}{2} \\\\text{ hours}$. The distance Alicia travels is $18 \\\\cdot \\\\frac{3}{2} = 27 \\\\text{ miles from } A$. Thus, $\\\\left| (\\\\mathbf{E})\\\\right.27$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q2",
+            "question": "The weight of $\\\\frac{1}{3}$ of a large pizza together with $3\\\\frac{1}{2}$ cups of orange slices is the same as the weight of $\\\\frac{3}{4}$ of a large pizza together with $\\\\frac{1}{2}$ cup of orange slices. A cup of orange slices weighs $\\\\frac{1}{4}$ of a pound. What is the weight, in pounds, of a large pizza?",
+            "options": [
+                { "label": "A", "value": "1 \\\\frac{4}{5}" },
+                { "label": "B", "value": "2" },
+                { "label": "C", "value": "2 \\\\frac{2}{5}" },
+                { "label": "D", "value": "3" },
+                { "label": "E", "value": "3 \\\\frac{3}{5}" }
+            ],
+            "correct_option": "A",
+            "solution": [
+                "Let $x$ be the weight of a pizza and $y$ be the weight of a cup of orange slices. We write $$\\\\frac{1}{3}x + \\\\frac{7}{2}y = \\\\frac{3}{4}x + \\\\frac{1}{2}y.$$ Rearranging gives $$\\\\frac{5}{12}x = 3y.$$ Thus, $x = \\\\frac{36}{5}y$. Plugging in $\\\\frac{1}{4}$ pounds for $y$, we find $\\\\frac{9}{5} = \\\\boxed{(\\\\mathbf{A})~1 \\\\frac{4}{5}}$.",
+                "Let $p$ be the weight of a pizza, and $o$ be the weight of a cup of orange slices, with $o = \\\\frac{1}{4}$. The equation is: $$\\\\frac{1}{3}p + \\\\frac{7}{2} \\\\cdot \\\\frac{1}{4} = \\\\frac{3}{4}p + \\\\frac{1}{2} \\\\cdot \\\\frac{1}{4}.$$ Solving yields $p = \\\\frac{9}{5} = \\\\boxed{(\\\\mathbf{A})~1\\\\frac{4}{5}}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q3",
+            "question": "How many positive perfect squares less than 2023 are divisible by 5?",
+            "options": [
+                { "label": "A", "value": "8" },
+                { "label": "B", "value": "9" },
+                { "label": "C", "value": "10" },
+                { "label": "D", "value": "11" },
+                { "label": "E", "value": "12" }
+            ],
+            "correct_option": "A",
+            "solution": [
+                "Since $\\\\lfloor \\\\sqrt{2023} \\\\rfloor = 44$, there are $\\\\lfloor \\\\frac{44}{5} \\\\rfloor = 8$ perfect squares less than 2023 that are divisible by 5. Thus, the answer is $\\\\boxed{(\\\\mathbf{A})~8}$.",
+                "Since 5 is square-free, each perfect square divisible by it must be divisible by $5^2 = 25$. Calculating gives $\\\\left\\\\lfloor \\\\frac{2023}{25} \\\\right\\\\rfloor = 80$, meaning there are $\\\\boxed{(\\\\mathbf{A})~8}$ positive perfect squares."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q4",
+            "question": "How many digits are in the base-ten representation of $8^{5} \\\\cdot 5^{10} \\\\cdot 15^{5}$?",
+            "options": [
+                { "label": "A", "value": "14" },
+                { "label": "B", "value": "15" },
+                { "label": "C", "value": "16" },
+                { "label": "D", "value": "17" },
+                { "label": "E", "value": "18" }
+            ],
+            "correct_option": "E",
+            "solution": [
+                "The prime factorization gives $2^{15} \\\\cdot 3^5 \\\\cdot 5^{15} = 10^{15} \\\\cdot 3^5$. Therefore, the total number of digits is $15 + 3 = \\\\boxed{(\\\\mathbf{E})~18}$.",
+                "Calculating directly gives us $8^{5} \\\\cdot 5^{10} \\\\cdot 15^{5} = 2430000000000000000$. Counting digits leads to $\\\\boxed{(\\\\mathbf{E})~18}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q5",
+            "question": "Janet rolls a standard 6-sided die 4 times and keeps a running total of the numbers she rolls. What is the probability that at some point her running total will equal 3?",
+            "options": [
+                { "label": "A", "value": "\\\\frac{2}{9}" },
+                { "label": "B", "value": "\\\\frac{49}{216}" },
+                { "label": "C", "value": "\\\\frac{25}{108}" },
+                { "label": "D", "value": "\\\\frac{17}{72}" },
+                { "label": "E", "value": "\\\\frac{13}{54}" }
+            ],
+            "correct_option": "B",
+            "solution": [
+                "We analyze casework for dice rolls. The total yields $\\\\boxed{(\\\\mathbf{B})~\\\\frac{49}{216}}$.",
+                "Using a brute force approach, counting valid sequences leads to the same probability $\\\\boxed{(\\\\mathbf{B})~\\\\frac{49}{216}}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q6",
+            "question": "Points $A$ and $B$ lie on the graph of $y=\\log_{2}x$. The midpoint of $\\\\overline{AB}$ is (6,2). What is the positive difference between the $x$-coordinates of $A$ and $B$?",
+            "options": [
+                { "label": "A", "value": "2\\\\sqrt{11}" },
+                { "label": "B", "value": "4\\\\sqrt{3}" },
+                { "label": "C", "value": "8" },
+                { "label": "D", "value": "4\\\\sqrt{5}" },
+                { "label": "E", "value": "9" }
+            ],
+            "correct_option": "D",
+            "solution": [
+                "Using coordinates for $A$ and $B$ as defined, we found the difference in $x$ coordinates is $\\\\boxed{(\\\\mathbf{D})~4\\\\sqrt{5}}$.",
+                "From logarithmic properties and the midpoint formula, solving gives the same difference: $\\\\boxed{(\\\\mathbf{D})~4\\\\sqrt{5}}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q7",
+            "question": "In a table tennis tournament every participant played every other participant exactly once. Although there were twice as many right-handed players as left-handed players, the number of games won by left-handed players was $40\\\\%$ more than the number of games won by right-handed players. (There were no ties and no ambidextrous players.) What is the total number of games played?",
+            "options": [
+                { "label": "A", "value": "15" },
+                { "label": "B", "value": "36" },
+                { "label": "C", "value": "45" },
+                { "label": "D", "value": "48" },
+                { "label": "E", "value": "66" }
+            ],
+            "correct_option": "B",
+            "solution": [
+                "Using various relationships between the number of players and games won leads to $\\\\boxed{(\\\\mathbf{B})~36}$ as the total number of games.",
+                "After calculations based on the game rules, we conclude that the only possibility is: $\\\\boxed{(\\\\mathbf{B})~36}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q8",
+            "question": "If Mareen scores an 11 on her next test, her mean score will go up by 1. If she gets three 11's in a row, her mean score will increase by 2. What is her current mean test score?",
+            "options": [
+                { "label": "A", "value": "4" },
+                { "label": "B", "value": "5" },
+                { "label": "C", "value": "6" },
+                { "label": "D", "value": "7" },
+                { "label": "E", "value": "8" }
+            ],
+            "correct_option": "D",
+            "solution": [
+                "Letting $a$ be the number of tests and $x$ the mean score sets up the crucial equations: $S = ax$. Solving gives the present mean score $\\\\boxed{(\\\\mathbf{D})~7}$.",
+                "By applying mean value conditions and averages, we work to find the current score: $\\\\boxed{(\\\\mathbf{D})~7}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q9",
+            "question": "A square with area 3 has a square with area 2 inscribed in it. This creates 4 smaller congruent right triangles. What is the ratio of the smaller leg to the larger leg in the shaded right triangle?",
+            "options": [
+                { "label": "A", "value": "\\\\frac{1}{5}" },
+                { "label": "B", "value": "\\\\frac{1}{4}" },
+                { "label": "C", "value": "2 - \\\\sqrt{3}" },
+                { "label": "D", "value": "\\\\sqrt{3} - \\\\sqrt{2}" },
+                { "label": "E", "value": "\\\\sqrt{2} - 1" }
+            ],
+            "correct_option": "C",
+            "solution": [
+                "The properties of the triangle yield $2 - \\\\sqrt{3}$ as the leg ratio, so the answer is $\\\\boxed{(\\\\mathbf{C})~2 - \\\\sqrt{3}}$.",
+                "Using area calculations and further triangle properties also concludes the same ratio: $\\\\boxed{(\\\\mathbf{C})~2 - \\\\sqrt{3}}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q10",
+            "question": "Positive real numbers $x$ and $y$ satisfy $$y^3 = x^2 \\\\text{ and } (y - x)^2 = 4y^2.$$ What is $x + y$?",
+            "options": [
+                { "label": "A", "value": "12" },
+                { "label": "B", "value": "18" },
+                { "label": "C", "value": "24" },
+                { "label": "D", "value": "36" },
+                { "label": "E", "value": "42" }
+            ],
+            "correct_option": "D",
+            "solution": [
+                "By solving the systems of equations we derive, we find $x + y = 36$. Hence, the answer is $\\\\boxed{(\\\\mathbf{D})~36}$.",
+                "Substituting found values back leads to the conclusive summation: $x + y = 36$. Therefore, $\\\\boxed{(\\\\mathbf{D})~36}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q11",
+            "question": "What is the degree measure of the acute angle formed by lines with slopes 2 and $\\\\frac{1}{3}$?",
+            "options": [
+                { "label": "A", "value": "30" },
+                { "label": "B", "value": "37.5" },
+                { "label": "C", "value": "45" },
+                { "label": "D", "value": "52.5" },
+                { "label": "E", "value": "60" }
+            ],
+            "correct_option": "C",
+            "solution": [
+                "The acute angle between the two given slopes can be derived using the formula $\\\\tan(\\\\theta) = \\\\frac{m_1 - m_2}{1 + m_1 m_2}$. This gives $\\\\theta = 45^{\\\\circ}$, so the answer is $\\\\boxed{(\\\\mathbf{C})~45}$.",
+                "Utilizing slopes through calculations confirms that the resultant angle indeed checks out as $\\\\boxed{(\\\\mathbf{C})~45^{\\\\circ}}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q12",
+            "question": "What is the value of $$2^3 - 1^2 + 4^3 - 3^3 + 6^3 - 5^3 + \\\\ldots + 18^3 - 17^3?$$",
+            "options": [
+                { "label": "A", "value": "2023" },
+                { "label": "B", "value": "2679" },
+                { "label": "C", "value": "2941" },
+                { "label": "D", "value": "3159" },
+                { "label": "E", "value": "3235" }
+            ],
+            "correct_option": "D",
+            "solution": [
+                "Breaking down the cubic sum yields distinct parts that lead to an overall of $\\\\boxed{(\\\\mathbf{D})~3159}$.",
+                "The effective calculation resolves to 3159, hence reaffirming that the answer is $\\\\boxed{(\\\\mathbf{D})~3159}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q13",
+            "question": "In a table tennis tournament every participant played every other participant exactly once. Although there were twice as many right-handed players as left-handed players, the number of games won by left-handed players was $40\\\\%$ more than the number of games won by right-handed players. (There were no ties and no ambidextrous players.) What is the total number of games played?",
+            "options": [
+                { "label": "A", "value": "15" },
+                { "label": "B", "value": "36" },
+                { "label": "C", "value": "45" },
+                { "label": "D", "value": "48" },
+                { "label": "E", "value": "66" }
+            ],
+            "correct_option": "B",
+            "solution": [
+                "Following from the conditions, the games yield total $\\\\boxed{(\\\\mathbf{B})~36}$ given the player structure.",
+                "Analyzing player wins confirms the total games played resolves effectively to $\\\\boxed{(\\\\mathbf{B})~36}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q14",
+            "question": "If $A$ and $B$ are vertices of a polyhedron, define the distance $d(A, B)$ to be the minimum number of edges of the polyhedron one must traverse in order to connect $A$ and $B$. What is the probability that $d(Q,R) > d(R,S)$?",
+            "options": [
+                { "label": "A", "value": "\\\\frac{7}{22}" },
+                { "label": "B", "value": "\\\\frac{1}{3}" },
+                { "label": "C", "value": "\\\\frac{3}{8}" },
+                { "label": "D", "value": "\\\\frac{5}{12}" },
+                { "label": "E", "value": "\\\\frac{1}{2}" }
+            ],
+            "correct_option": "A",
+            "solution": [
+                "Upon analyzing the distances in an icosahedron, we discover that the overall probability successfully calculates to $\\\\boxed{(\\\\mathbf{A})\\\\frac{7}{22}}$.",
+                "Calculating all cases derives to the same conclusion, hence validating that the result is indeed $\\\\boxed{(\\\\mathbf{A})\\\\frac{7}{22}}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q15",
+            "question": "Let $f$ be the unique function defined on positive integers such that $$\\\\sum_{d|n}d\\\\cdot f\\\\left(\\\\frac{n}{d}\\\\right)=1$$. What is $f(2023)$?",
+            "options": [
+                { "label": "A", "value": "-1536" },
+                { "label": "B", "value": "96" },
+                { "label": "C", "value": "108" },
+                { "label": "D", "value": "116" },
+                { "label": "E", "value": "144" }
+            ],
+            "correct_option": "B",
+            "solution": [
+                "Finding $f(7)$ and $f(17)$ leads to $96$, confirming the formula's consistency thus yielding $\\\\boxed{(\\\\mathbf{B})~96}$.",
+                "Utilizing multiplicative properties alongside the definition yields the same resulting function value $\\\\boxed{(\\\\mathbf{B})~96}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q16",
+            "question": "Consider the set of complex numbers $Z$ satisfying $|1 + z + z^{2}| = 4$. The largest possible value for the imaginary part of $Z$ can be written as $\\\\frac{\\\\sqrt{m}}{n}$ where $m$ and $n$ are positive integers. What is $m+n$?",
+            "options": [
+                { "label": "A", "value": "20" },
+                { "label": "B", "value": "21" },
+                { "label": "C", "value": "22" },
+                { "label": "D", "value": "23" },
+                { "label": "E", "value": "24" }
+            ],
+            "correct_option": "B",
+            "solution": [
+                "Through the equation derivation and subsequent calculations, $m+n$ is calculated as $21$, leading to answer $\\\\boxed{(\\\\mathbf{B})~21}$.",
+                "This analytic maximal determination yields the same result, concluding that $m+n=21$ thus returning $\\\\boxed{(\\\\mathbf{B})~21}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q17",
+            "question": "Flora the frog starts at O on the number line and makes a sequence of jumps to the right. In any one jump, Flora leaps a positive integer distance $m$ with probability $m$. What is the probability that Flora will eventually land at 10?",
+            "options": [
+                { "label": "A", "value": "\\\\frac{5}{512}" },
+                { "label": "B", "value": "\\\\frac{45}{1024}" },
+                { "label": "C", "value": "\\\\frac{127}{1024}" },
+                { "label": "D", "value": "\\\\frac{511}{1024}" },
+                { "label": "E", "value": "\\\\frac{1}{2}" }
+            ],
+            "correct_option": "E",
+            "solution": [
+                "By analyzing the total probabilities, we reach $\\\\boxed{(\\\\mathbf{E})~\\\\frac{1}{2}}$ as the determined result.",
+                "Further evaluation supports the probability conclusion affirming that $\\\\boxed{(\\\\mathbf{E})~\\\\frac{1}{2}}$ is valid."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q18",
+            "question": "Circle $C_1$ and $C_2$ have radius 1, and the distance between their centers is $\\\\frac{1}{2}$. Circle $C_3$ is the largest circle internally tangent to both $C_{1}$ and $C_2$. What is the radius of $C_4$?",
+            "options": [
+                { "label": "A", "value": "\\\\frac{1}{14}" },
+                { "label": "B", "value": "\\\\frac{1}{12}" },
+                { "label": "C", "value": "\\\\frac{1}{10}" },
+                { "label": "D", "value": "\\\\frac{3}{28}" },
+                { "label": "E", "value": "\\\\frac{1}{9}" }
+            ],
+            "correct_option": "D",
+            "solution": [
+                "By solving geometric relations involving the inner tangent circles, we conclude the radius of $C_4$ is $\\\\frac{3}{28}$, therefore the answer is $\\\\boxed{\\\\mathbf{(D)}~\\\\frac{3}{28}}$.",
+                "The detailed geometric calculations yield conclusive evidence that $C_4$'s radius is indeed $\\\\boxed{\\\\mathbf{(D)}~\\\\frac{3}{28}}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q19",
+            "question": "What is the product of all the solutions to the equation $$\\\\log_{7x}2023 \\\\cdot \\\\log_{289}2023 = \\\\log_{2023}2023$$?",
+            "options": [
+                { "label": "A", "value": "(\\\\log_{2023}7 \\\\cdot \\\\log_{2023}289)^2" },
+                { "label": "B", "value": "\\\\log_{2023}7 \\\\cdot \\\\log_{2023}289" },
+                { "label": "C", "value": "1" },
+                { "label": "D", "value": "\\\\log_{7}2023 \\\\cdot \\\\log_{289}2023" },
+                { "label": "E", "value": "(\\\\log_{7}2023 \\\\cdot \\\\log_{289}2023)^2" }
+            ],
+            "correct_option": "C",
+            "solution": [
+                "This resolves through logarithmic identities that lead to $\\\\boxed{(\\\\mathbf{C})~1}$ as the product of all solutions.",
+                "Utilizing previously derived relationships confirms that the answer resolves to $\\\\boxed{(\\\\mathbf{C})~1}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q20",
+            "question": "Rows 1, 2, 3, 4, and 5 of a triangular array of integers are shown below:<br>![](https://latex.artofproblemsolving.com/6/6/a/66a74e42d004740860a7d1c7d4eff043a98233ca.png)<br>Each row after the first row is formed by placing a 1 at each end of the row, and each interior entry is 1 greater than the sum of the two numbers diagonally above it in the previous row. What is the units digit of the sum of the 2023 numbers in the 2023rd row?",
+            "options": [
+                { "label": "A", "value": "1" },
+                { "label": "B", "value": "3" },
+                { "label": "C", "value": "5" },
+                { "label": "D", "value": "7" },
+                { "label": "E", "value": "9" }
+            ],
+            "correct_option": "C",
+            "solution": [
+                "First, let $R(n)$ be the sum of the $n$th row. With some observation, we guess that $R(n) = 2^n - n$. Proving this by induction: $R(1) = 2^1 - 1 = 1$. For $k$, $R(k) = 2^k - k$, and $R(k+1) = 2^{k+1} - (k+1)$ gives us the required relation.",
+                "For $n = 2023$, we find $R(2023) = 2^{2023} - 2023$. The last digit of $2^{2023}$ is 8, leading to a final units digit of $5$. Thus, the units digit is $\\\\boxed{(\\\\mathbf{C})~5}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q21",
+            "question": "If $A$ and $B$ are vertices of a polyhedron, define the distance $d(A, B)$ to be the minimum number of edges of the polyhedron one must traverse in order to connect $A$ and $B$. For example, if $\\overline{AB}$ is an edge of the polyhedron, then $d(A,B)=1$, but if $\\overline{AC}$ and $\\overline{CB}$ are edges and $\\overline{AB}$ is not an edge, then $d(A,B)=2$. Let $Q, R$, and $S$ be randomly chosen distinct vertices of a regular icosahedron. What is the probability that $d(Q,R)>d(R,S)$?",
+            "options": [
+                { "label": "A", "value": "\\\\frac{7}{22}" },
+                { "label": "B", "value": "\\\\frac{1}{3}" },
+                { "label": "C", "value": "\\\\frac{3}{8}" },
+                { "label": "D", "value": "\\\\frac{5}{12}" },
+                { "label": "E", "value": "\\\\frac{1}{2}" }
+            ],
+            "correct_option": "A",
+            "solution": [
+                "To find the total number of vertices, we start with the number of edges, which is $\\\\frac{20 \\\\times 3}{2}$. Then, applying Euler's characteristic $V - E + F = 2$, we find there are 12 vertices.",
+                "Using casework for distances on the icosahedron, we find that $P(d(Q,R) > d(R,S)) = \\\\frac{120 + 300}{1320} = \\\\frac{7}{22}$, leading to $\\\\boxed{(\\\\mathbf{A})\\\\frac{7}{22}}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q22",
+            "question": "Let $f$ be the unique function defined on positive integers such that $$\\\\displaystyle\\\\sum_{d|n}d\\\\cdot f\\\\left(\\\\frac{n}{d}\\\\right)=1$$ for all positive integers $n$. What is $f(2023)$?",
+            "options": [
+                { "label": "A", "value": "-1536" },
+                { "label": "B", "value": "96" },
+                { "label": "C", "value": "108" },
+                { "label": "D", "value": "116" },
+                { "label": "E", "value": "144" }
+            ],
+            "correct_option": "B",
+            "solution": [
+                "Through careful analysis, we find that $f(2023) = 96$. Thus, the answer is $\\\\boxed{(\\\\mathbf{B})~96}$.",
+                "Using the properties of the arithmetic function yields the same result confirming that $f(2023) = 96$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q23",
+            "question": "How many ordered pairs of positive real numbers $(a,b)$ satisfy the equation $$(1 + 2a)(2 + 2b)(2a + b) = 32ab$$?",
+            "options": [
+                { "label": "A", "value": "0" },
+                { "label": "B", "value": "1" },
+                { "label": "C", "value": "2" },
+                { "label": "D", "value": "3" },
+                { "label": "E", "value": "an infinite number" }
+            ],
+            "correct_option": "B",
+            "solution": [
+                "Using the AM-GM inequality on the left-hand side leads us to discover there is exactly one ordered pair $(a,b)$ meeting the criteria, thus $\\\\boxed{(\\\\mathbf{B})~1}$.",
+                "The structure of the equation confirms the unique solution providing the same result: $\\\\boxed{(\\\\mathbf{B})~1}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q24",
+            "question": "Let $K$ be the number of sequences $A_{1}, A_{2}, \\\\cdots, A_{n}$ such that $n$ is a positive integer less than or equal to 10, each $A_i$ is a subset of $\\\\{1, 2, 3, \\\\ldots, 10\\\\}$, and $A_{i-1}$ is a subset of $A_i$ for each $i$ between 2 and $n$ inclusive. What is the remainder when $K$ is divided by 10?",
+            "options": [
+                { "label": "A", "value": "1" },
+                { "label": "B", "value": "3" },
+                { "label": "C", "value": "5" },
+                { "label": "D", "value": "7" },
+                { "label": "E", "value": "9" }
+            ],
+            "correct_option": "C",
+            "solution": [
+                "By considering sequences of subsets, the total available combinations yield a modular remainder of 5 upon division by 10, hence the result is $\\\\boxed{(\\\\mathbf{C})~5}$.",
+                "Further evaluations of permutations are confirmed through confirmations of powers yielding: $\\\\boxed{(\\\\mathbf{C})~5}$."
+            ]
+        },
+        {
+            "id": "2023_AMC_12A_Q25",
+            "question": "There is a unique sequence of integers $a_{1}, a_{2}, \\\\ldots, a_{2023}$ such that $$\\\\tan2023x = \\\\frac{a_1 \\\\tan x + a_3 \\\\tan^3 x + a_5 \\\\tan^5 x + \\\\cdots + a_{2023} \\\\tan^{2023} x}{1 + a_2 \\\\tan^2 x + a_4 \\\\tan^4 x + \\\\cdots + a_{2022} \\\\tan^{2022} x}$$ whenever $\\\\tan 2023x$ is defined. What is $a_{2023}$?",
+            "options": [
+                { "label": "A", "value": "-2023" },
+                { "label": "B", "value": "-2022" },
+                { "label": "C", "value": "-1" },
+                { "label": "D", "value": "1" },
+                { "label": "E", "value": "2023" }
+            ],
+            "correct_option": "C",
+            "solution": [
+                "Based on the formulas for the tangent function, we conclude that $a_{2023} = -1$. Therefore, the answer is $\\\\boxed{(\\\\mathbf{C})~-1}$.",
+                "From the established pattern through calculations it validates that $a_{2023} = -1$ leading to the result $\\\\boxed{(\\\\mathbf{C})~-1}$."
+            ]
+        }
+    ]
+}

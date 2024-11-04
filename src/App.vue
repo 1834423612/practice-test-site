@@ -23,7 +23,7 @@
         </div>
       </div>
     </header>
-    <main class="container mx-auto p-4 mt-8">
+    <main class="container mx-auto p-4">
       <router-view></router-view>
     </main>
     <!-- <footer class="bg-gray-800 text-white py-4 mt-12">

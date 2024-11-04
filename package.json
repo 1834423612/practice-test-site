@@ -6,11 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "fix-amc": "ts-node --loader ts-node/esm fixAMCJson.ts"
   },
   "dependencies": {
+    "@types/node": "^22.8.7",
     "autoprefixer": "latest",
     "axios": "^1.7.2",
+    "fs": "0.0.1-security",
+    "katex": "^0.16.11",
     "postcss": "latest",
     "sweetalert2": "^11.12.4",
     "tailwindcss": "latest",
@@ -18,8 +22,10 @@
   },
   "devDependencies": {
     "@iconify/vue": "^4.1.2",
+    "@types/katex": "^0.16.7",
     "@types/vue-router": "^2.0.0",
     "@vitejs/plugin-vue": "^5.0.5",
+    "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
     "vite": "^5.3.4",
     "vue-router": "^4.0.13",

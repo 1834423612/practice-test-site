@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import Swal from 'sweetalert2'
 import { Icon } from '@iconify/vue'
+import './assets/tailwind.css'
 
 
 const app = createApp(App)

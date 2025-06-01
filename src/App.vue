@@ -188,8 +188,8 @@ const wrongQuestionsCount = ref(0)
 const showWrongQuestions = ref(false)
 const showMobileMenu = ref(false)
 
-const updateWrongQuestionsCount = () => {
-  wrongQuestionsCount.value = getWrongQuestions().length
+const updateWrongQuestionsCount = async () => {
+  wrongQuestionsCount.value = (await getWrongQuestions()).length
 }
 
 const startWrongQuestionsPractice = (questions: any[]) => {

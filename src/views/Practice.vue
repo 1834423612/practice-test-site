@@ -13,7 +13,7 @@
                         <div v-if="useTimer" class="flex items-center space-x-1 text-gray-700 font-semibold">
                             <Icon :icon="timerType === 'countdown' ? 'lucide:timer' : 'lucide:clock'" class="w-4 h-4" />
                             <span class="text-sm">{{ formatTime(timerType === 'countdown' ? remainingTime : elapsedTime)
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <!-- Question Counter with Navigator -->
@@ -59,7 +59,7 @@
                         <div v-if="useTimer" class="flex items-center space-x-2 text-gray-700 font-semibold">
                             <Icon :icon="timerType === 'countdown' ? 'lucide:timer' : 'lucide:clock'" class="w-5 h-5" />
                             <span class="text-lg">{{ formatTime(timerType === 'countdown' ? remainingTime : elapsedTime)
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <!-- Question Counter with Navigator -->
@@ -111,10 +111,10 @@
                         <div v-else-if="currentQuestion" class="overflow-x-auto">
                             <QuestionArea :currentQuestion="currentQuestion"
                                 :currentQuestionIndex="currentQuestionIndex" :totalQuestions="totalAvailableQuestions"
-                                v-model:selectedAnswer="selectedAnswer" :showFeedback="showFeedback"
-                                :isCorrect="isCorrect" :explanation="explanation" :sessionStats="sessionStats"
-                                @check-answer="checkAnswer" @skip-question="skipQuestion" @next-question="nextQuestion"
-                                @go-to-previous="goToPrevious" @go-to-next="goToNext" />
+                                v-model:selectedAnswer="selectedAnswer" v-model:showFeedback="showFeedback"
+                                v-model:isCorrect="isCorrect" v-model:explanation="explanation"
+                                :sessionStats="sessionStats" @check-answer="checkAnswer" @skip-question="skipQuestion"
+                                @next-question="nextQuestion" @go-to-previous="goToPrevious" @go-to-next="goToNext" />
                         </div>
                     </div>
 
@@ -124,26 +124,23 @@
                         :domainPerformance="domainPerformance" @restart-practice="restartPractice" />
                 </div>
             </div>
-        </div>
 
-        <!-- Wrong Questions Manager Modal -->
-        <div v-if="showWrongQuestions" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
-            <div class="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
-                <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-                    <h3 class="text-xl font-semibold text-gray-800">Wrong Questions Manager</h3>
-                    <button
-                        @click="showWrongQuestions = false"
-                        class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors duration-200"
-                    >
-                        <Icon icon="lucide:x" class="w-4 h-4" />
-                    </button>
-                </div>
-                <div class="overflow-y-auto max-h-[calc(90vh-80px)]">
-                    <WrongQuestionsManager
-                        :isInPracticeMode="false"
-                        @start-wrong-questions-practice="startWrongQuestionsPractice"
-                        @review-question="reviewQuestion"
-                    />
+            <!-- Wrong Questions Manager Modal -->
+            <div v-if="showWrongQuestions"
+                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
+                <div class="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
+                    <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-xl font-semibold text-gray-800">Wrong Questions Manager</h3>
+                        <button @click="showWrongQuestions = false"
+                            class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors duration-200">
+                            <Icon icon="lucide:x" class="w-4 h-4" />
+                        </button>
+                    </div>
+                    <div class="overflow-y-auto max-h-[calc(90vh-80px)]">
+                        <WrongQuestionsManager :isInPracticeMode="false"
+                            @start-wrong-questions-practice="startWrongQuestionsPractice"
+                            @review-question="reviewQuestion" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -167,6 +164,7 @@ import {
     getWrongQuestions,
     resetTimer,
     saveQuestionProgress,
+    getQuestionProgress,
     checkAnswer as checkAnswerUtil,
     saveWrongQuestion,
     onWrongQuestionsUpdate,
@@ -242,9 +240,49 @@ const sessionStats = computed(() => {
     }
 })
 
+// IndexedDB helper functions to replace localStorage
+const getCompletedQuestions = async (): Promise<string[]> => {
+    try {
+        const progress = await getQuestionProgress()
+        return Object.keys(progress).filter(questionId => progress[questionId].answered)
+    } catch (error) {
+        console.error('Error getting completed questions:', error)
+        return []
+    }
+}
+
+// const saveCompletedQuestion = async (questionId: string) => {
+//     try {
+//         await saveQuestionProgress(questionId, {
+//             questionId,
+//             answered: true,
+//             isCorrect: false, // Will be updated when actually answered
+//             userAnswer: '',
+//             timestamp: Date.now()
+//         })
+//     } catch (error) {
+//         console.error('Error saving completed question:', error)
+//     }
+// }
+
+const clearCompletedQuestions = async () => {
+    try {
+        // This would need to be implemented in enhancedPracticeUtils.ts
+        // For now, we'll just log it
+        console.log('Clear completed questions requested')
+    } catch (error) {
+        console.error('Error clearing completed questions:', error)
+    }
+}
+
 // Methods
-const updateWrongQuestionsCount = () => {
-    wrongQuestionsCount.value = getWrongQuestions().length
+const updateWrongQuestionsCount = async () => {
+    try {
+        wrongQuestionsCount.value = (await getWrongQuestions()).length
+    } catch (error) {
+        console.error('Error updating wrong questions count:', error)
+        wrongQuestionsCount.value = 0
+    }
 }
 
 const handleStartPractice = async (settings: any) => {
@@ -260,7 +298,7 @@ const handleStartPractice = async (settings: any) => {
     remainingTime.value = settings.timerDuration
 
     if (settings.resetProgress) {
-        clearCompletedQuestions()
+        await clearCompletedQuestions()
     }
 
     try {
@@ -289,7 +327,7 @@ const fetchQuestionIds = async (assessmentId: number, testId: number, domainIds:
         domain: domainIds.join(',')
     })
 
-    const completedQuestions = getCompletedQuestions()
+    const completedQuestions = await getCompletedQuestions()
     questions.value = response.data
         .filter((q: any) => q.external_id && !completedQuestions.includes(q.external_id))
         .map((q: any) => ({ ...q, loaded: false }))
@@ -321,48 +359,85 @@ const loadNextQuestion = async () => {
     }
 }
 
-const checkAnswer = () => {
+const checkAnswer = async () => {
     const question = currentQuestion.value
 
-    // Use the fixed answer checking logic
-    isCorrect.value = checkAnswerUtil(question, selectedAnswer.value)
-
-    showFeedback.value = true
-    explanation.value = question.rationale
-
-    // 保存当前题目的作答状态
-    question.userAnswer = selectedAnswer.value
-    question.answered = true
-    question.isCorrect = isCorrect.value
-
-    totalQuestions.value++
-
-    if (isCorrect.value) {
-        correctAnswers.value++
-    } else {
-        incorrectAnswers.value++
-        // Only save to wrong questions if the answer is actually incorrect
-        saveWrongQuestion(question, selectedAnswer.value)
+    if (!question || !selectedAnswer.value) {
+        console.log('No question or answer to check')
+        return
     }
 
-    // Save progress
-    const progress = {
-        questionId: question.external_id,
-        answered: true,
-        isCorrect: isCorrect.value,
-        userAnswer: selectedAnswer.value,
-        timestamp: Date.now()
-    }
+    console.log('Checking answer:', selectedAnswer.value, 'for question:', question.external_id)
 
-    saveQuestionProgress(question.external_id, progress)
-    updateDomainPerformance(question.domain, isCorrect.value)
-    saveCompletedQuestion(question.external_id)
+    try {
+        // Use the fixed answer checking logic
+        isCorrect.value = checkAnswerUtil(question, selectedAnswer.value)
+        showFeedback.value = true
+        explanation.value = question.rationale || ''
+
+        console.log('Answer check result:', {
+            isCorrect: isCorrect.value,
+            showFeedback: showFeedback.value,
+            explanation: explanation.value ? 'Has content' : 'Empty',
+            selectedAnswer: selectedAnswer.value
+        })
+
+        // Update question state
+        question.userAnswer = selectedAnswer.value
+        question.answered = true
+        question.isCorrect = isCorrect.value
+        question.checked = true
+
+        totalQuestions.value++
+
+        if (isCorrect.value) {
+            correctAnswers.value++
+        } else {
+            incorrectAnswers.value++
+            // Save to wrong questions if incorrect
+            console.log('Saving wrong question to collection')
+            await saveWrongQuestion(question, selectedAnswer.value)
+            await updateWrongQuestionsCount() // Update count immediately
+        }
+
+        // Save progress to IndexedDB - 确保保存正确的用户答案
+        const progressData = {
+            questionId: question.external_id,
+            answered: true,
+            isCorrect: isCorrect.value,
+            userAnswer: selectedAnswer.value, // 确保这里保存的是实际选择的答案
+            timestamp: Date.now(),
+            checked: true // 添加 checked 标志
+        }
+
+        console.log('Saving progress data:', progressData)
+        await saveQuestionProgress(question.external_id, progressData)
+
+        updateDomainPerformance(question.domain, isCorrect.value)
+
+        // Force a UI update by creating a small delay
+        await new Promise(resolve => setTimeout(resolve, 50))
+
+        // Double-check state after saving
+        console.log('Final state after check:', {
+            showFeedback: showFeedback.value,
+            isCorrect: isCorrect.value,
+            selectedAnswer: selectedAnswer.value
+        })
+    } catch (error) {
+        console.error('Error checking answer:', error)
+        // Try to recover from error
+        showFeedback.value = true
+        explanation.value = question.rationale || 'Explanation not available'
+    }
 }
 
 const nextQuestion = async () => {
     currentQuestionIndex.value++
     selectedAnswer.value = ''
     showFeedback.value = false
+    isCorrect.value = false
+    explanation.value = ''
     loading.value = true
     await loadNextQuestion()
     loading.value = false
@@ -374,18 +449,56 @@ const skipQuestion = () => {
 
 const goToQuestion = async (index: number) => {
     if (index >= 0 && index < questions.value.length) {
+        console.log('Navigating to question index:', index)
+
         currentQuestionIndex.value = index
         const nextQ = questions.value[index]
-        if (nextQ.answered) {
-            selectedAnswer.value = nextQ.userAnswer || ''
-            showFeedback.value = true
-        } else {
-            selectedAnswer.value = ''
-            showFeedback.value = false
-        }
+
+        // Reset state first
+        selectedAnswer.value = ''
+        showFeedback.value = false
+        isCorrect.value = false
+        explanation.value = ''
+
         loading.value = true
         await loadNextQuestion()
         loading.value = false
+
+        // Now load saved state from IndexedDB
+        try {
+            const progress = await getQuestionProgress()
+            const savedProgress = progress[nextQ.external_id]
+
+            console.log('Loading saved progress for question:', nextQ.external_id, savedProgress)
+
+            if (savedProgress && savedProgress.answered) {
+                // 恢复用户选择的答案
+                selectedAnswer.value = savedProgress.userAnswer || ''
+
+                // 如果问题已经被检查过，恢复反馈状态
+                if (savedProgress.checked) {
+                    isCorrect.value = savedProgress.isCorrect || false
+                    explanation.value = nextQ.rationale || ''
+
+                    // 延迟设置 showFeedback 以确保其他状态先更新
+                    await new Promise(resolve => setTimeout(resolve, 100))
+                    showFeedback.value = true
+
+                    console.log('Restored complete state:', {
+                        selectedAnswer: selectedAnswer.value,
+                        showFeedback: showFeedback.value,
+                        isCorrect: isCorrect.value,
+                        explanation: explanation.value ? 'Has content' : 'Empty'
+                    })
+                } else {
+                    console.log('Question answered but not checked, only restoring answer:', selectedAnswer.value)
+                }
+            } else {
+                console.log('No saved progress found for question:', nextQ.external_id)
+            }
+        } catch (error) {
+            console.error('Error loading question progress:', error)
+        }
     }
 }
 
@@ -477,25 +590,14 @@ const updateDomainPerformance = (domain: string, isCorrect: boolean) => {
     }
 }
 
-const getCompletedQuestions = (): string[] => {
-    const saved = localStorage.getItem('completedQuestions')
-    return saved ? JSON.parse(saved) : []
-}
-
-const saveCompletedQuestion = (questionId: string) => {
-    const completedQuestions = getCompletedQuestions()
-    if (!completedQuestions.includes(questionId)) {
-        completedQuestions.push(questionId)
-        localStorage.setItem('completedQuestions', JSON.stringify(completedQuestions))
-    }
-}
-
-const clearCompletedQuestions = () => {
-    localStorage.removeItem('completedQuestions')
-}
-
 const startWrongQuestionsPractice = (wrongQuestions: any[]) => {
-    questions.value = wrongQuestions.map(q => ({ ...q, loaded: true }))
+    questions.value = wrongQuestions.map(wq => ({
+        ...wq.question,
+        loaded: true,
+        userAnswer: wq.userAnswer,
+        answered: false,
+        isCorrect: false
+    }))
     currentQuestionIndex.value = 0
     totalAvailableQuestions.value = questions.value.length
     selectedAnswer.value = ''
@@ -525,10 +627,9 @@ const loadWrongQuestionsFromQuery = async () => {
             const questionIds = JSON.parse(route.query.questions as string)
 
             if (Array.isArray(questionIds) && questionIds.length > 0) {
-                const wrongQuestions = getWrongQuestions()
+                const wrongQuestions = await getWrongQuestions()
                 const questionsToLoad = wrongQuestions
                     .filter(wq => questionIds.includes(wq.externalId))
-                    .map(wq => wq.question)
 
                 if (questionsToLoad.length > 0) {
                     startWrongQuestionsPractice(questionsToLoad)
@@ -560,7 +661,7 @@ const loadReviewQuestionFromQuery = async () => {
             loading.value = true
             const questionId = route.query.questionId as string
 
-            const wrongQuestions = getWrongQuestions()
+            const wrongQuestions = await getWrongQuestions()
             const questionToReview = wrongQuestions.find(wq => wq.externalId === questionId)
 
             if (questionToReview) {
@@ -599,11 +700,26 @@ const loadReviewQuestionFromQuery = async () => {
     }
 }
 
+// Add watchers to debug state changes
+watch(showFeedback, (newVal) => {
+    console.log('showFeedback changed to:', newVal)
+})
+
+watch(isCorrect, (newVal) => {
+    console.log('isCorrect changed to:', newVal)
+})
+
+watch(explanation, (newVal) => {
+    console.log('explanation changed:', newVal ? 'Has content' : 'Empty')
+})
+
+watch(selectedAnswer, (newVal) => {
+    console.log('selectedAnswer changed to:', newVal)
+})
+
 // Watch for question changes to reset state
 watch(currentQuestionIndex, () => {
-    isCorrect.value = false
-    showFeedback.value = false
-    selectedAnswer.value = ''
+    // Don't reset state here as it's handled in goToQuestion
 })
 
 // Watch for route query changes
@@ -616,8 +732,8 @@ watch(() => route.query, (newQuery) => {
 }, { immediate: false, deep: true })
 
 // Setup reactive wrong questions count updates
-onMounted(() => {
-    updateWrongQuestionsCount()
+onMounted(async () => {
+    await updateWrongQuestionsCount()
     onWrongQuestionsUpdate(updateWrongQuestionsCount)
 
     // Check for query parameters on initial load

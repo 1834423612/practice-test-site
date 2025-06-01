@@ -1,7 +1,8 @@
 <template>
     <div class="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         <!-- Session Stats Header -->
-        <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-blue-100">
+        <div
+            class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-blue-100">
             <!-- Mobile Layout -->
             <div class="block sm:hidden space-y-3">
                 <!-- Stats Row -->
@@ -23,7 +24,7 @@
                         <div class="text-xs text-gray-600">Accuracy</div>
                     </div>
                 </div>
-                
+
                 <!-- Progress Bar Row -->
                 <div class="w-full">
                     <div class="flex justify-between text-xs text-gray-600 mb-1">
@@ -97,38 +98,39 @@
         <!-- Question Content -->
         <div class="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <!-- Stimulus -->
-            <div v-if="currentQuestion.stimulus" class="bg-gray-50 border-b border-gray-200 p-3 sm:p-6">
-                <div class="prose max-w-none text-gray-700 overflow-x-auto" v-html="currentQuestion.stimulus"></div>
+            <div v-if="cleanedStimulus" class="bg-gray-50 border-b border-gray-200 p-3 sm:p-6">
+                <div class="prose max-w-none text-gray-700 overflow-x-auto" v-html="cleanedStimulus"></div>
             </div>
 
             <!-- Main Question -->
             <div class="p-3 sm:p-6">
-                <div class="prose max-w-none w-[110%] text-gray-800 text-base sm:text-lg leading-relaxed mb-4 sm:mb-6 overflow-x-auto"
-                    v-html="currentQuestion.stem"
-                    style="transform: scale(0.9); transform-origin: top left;">
+                <div class="prose max-w-none text-gray-800 text-base sm:text-lg leading-relaxed mb-4 sm:mb-6 overflow-x-auto"
+                    v-html="cleanedStem">
                 </div>
 
                 <!-- Question Image -->
                 <div v-if="currentQuestion.image" class="my-4 sm:my-6 text-center overflow-x-auto">
                     <img :src="currentQuestion.image" alt="Question Image"
-                        class="w-4/5 h-auto rounded-xl shadow-md mx-auto border border-gray-200">
+                        class="max-w-none h-auto rounded-xl shadow-md mx-auto border border-gray-200">
                 </div>
 
                 <!-- Multiple Choice Options -->
                 <div v-if="currentQuestion.type === 'mcq'" class="space-y-2 sm:space-y-3">
                     <div v-for="(option, index) in currentQuestion.answerOptions" :key="option.id"
-                        @click="!showFeedback && selectOption(option.id)"
+                        @click="selectOption(option.id)"
                         class="group relative overflow-hidden rounded-lg sm:rounded-xl border-2 cursor-pointer transition-all duration-300"
                         :class="getOptionClasses(option.id, index)">
                         <div class="p-3 sm:p-4 flex items-start">
                             <div class="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mr-3 sm:mr-4 transition-all duration-300"
                                 :class="getOptionIndicatorClasses(option.id)">
-                                <span class="font-semibold text-xs sm:text-sm">{{ String.fromCharCode(65 + index) }}</span>
+                                <span class="font-semibold text-xs sm:text-sm">{{ String.fromCharCode(65 + index)
+                                    }}</span>
                             </div>
-                            <div class="flex-1 prose max-w-none overflow-x-auto text-sm sm:text-base" v-html="option.content"></div>
+                            <div class="flex-1 prose max-w-none overflow-x-auto text-sm sm:text-base"
+                                v-html="option.content"></div>
 
                             <!-- Feedback Icons -->
-                            <div v-if="showFeedback" class="flex-shrink-0 ml-3 sm:ml-4">
+                            <div v-if="localShowFeedback" class="flex-shrink-0 ml-3 sm:ml-4">
                                 <div v-if="isCorrectOption(option.id)"
                                     class="w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center">
                                     <Icon icon="lucide:check" class="w-3 h-3 sm:w-5 sm:h-5 text-white" />
@@ -148,7 +150,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-3">
                             Enter your answer:
                         </label>
-                        <input type="text" v-model="localSelectedAnswer" :disabled="showFeedback"
+                        <input type="text" v-model="localSelectedAnswer" :disabled="localShowFeedback"
                             class="w-full p-3 sm:p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed text-base sm:text-lg"
                             placeholder="Type your answer here...">
                         <p class="text-xs sm:text-sm text-gray-500 mt-2">
@@ -160,36 +162,40 @@
         </div>
 
         <!-- Action Buttons -->
-        <div v-if="!showFeedback" class="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+        <div v-if="!localShowFeedback"
+            class="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 overflow-hidden">
             <button @click="skipQuestion"
-                class="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg sm:rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center justify-center text-sm sm:text-base">
+                class="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg sm:rounded-xl hover:bg-gray-200 transition-colors duration-300 flex items-center justify-center text-sm sm:text-base">
                 <Icon icon="lucide:skip-forward" class="mr-2 w-3 h-3 sm:w-4 sm:h-4" />
                 Skip Question
             </button>
 
             <button @click="checkAnswer" :disabled="!localSelectedAnswer"
-                class="w-full sm:w-auto px-6 py-2 sm:px-8 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg sm:rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center text-sm sm:text-base">
+                class="w-full sm:w-auto px-6 py-2 sm:px-8 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg sm:rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-shadow duration-300 flex items-center justify-center text-sm sm:text-base">
                 <Icon icon="lucide:check-circle" class="mr-2 w-3 h-3 sm:w-4 sm:h-4" />
                 Check Answer
             </button>
         </div>
 
         <!-- Enhanced Answer Explanation -->
-        <div v-if="showFeedback" class="space-y-4 sm:space-y-6">
+        <div v-if="localShowFeedback" class="space-y-4 sm:space-y-6">
             <!-- Result Banner -->
             <div class="rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center"
-                :class="isCorrect ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200' : 'bg-gradient-to-r from-red-50 to-pink-50 border border-red-200'">
+                :class="localIsCorrect ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200' : 'bg-gradient-to-r from-red-50 to-pink-50 border border-red-200'">
                 <div class="flex items-center justify-center mb-4">
                     <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center"
-                        :class="isCorrect ? 'bg-green-500' : 'bg-red-500'">
-                        <Icon :icon="isCorrect ? 'lucide:check' : 'lucide:x'" class="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                        :class="localIsCorrect ? 'bg-green-500' : 'bg-red-500'">
+                        <Icon :icon="localIsCorrect ? 'lucide:check' : 'lucide:x'"
+                            class="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                     </div>
                 </div>
-                <h3 class="text-xl sm:text-2xl font-bold mb-2" :class="isCorrect ? 'text-green-700' : 'text-red-700'">
-                    {{ isCorrect ? 'Correct!' : 'Incorrect' }}
+                <h3 class="text-xl sm:text-2xl font-bold mb-2"
+                    :class="localIsCorrect ? 'text-green-700' : 'text-red-700'">
+                    {{ localIsCorrect ? 'Correct!' : 'Incorrect' }}
                 </h3>
                 <p class="text-sm sm:text-base text-gray-600">
-                    {{ isCorrect ? 'Great job! You got it right.' : 'Don\'t worry, let\'s review the explanation.' }}
+                    {{ localIsCorrect ? 'Great job! You got it right.' : 'Don\'t worry, let\'s review the explanation.'
+                    }}
                 </p>
             </div>
 
@@ -208,7 +214,8 @@
                                 <span class="font-bold text-xs sm:text-sm">{{ explanation.letter }}</span>
                             </div>
                             <div class="flex-1">
-                                <h5 class="font-semibold text-base sm:text-lg" :class="getExplanationTitleClasses(explanation)">
+                                <h5 class="font-semibold text-base sm:text-lg"
+                                    :class="getExplanationTitleClasses(explanation)">
                                     Choice {{ explanation.letter }}
                                     <span v-if="explanation.isCorrect" class="text-green-600">(Correct)</span>
                                     <span v-else-if="explanation.isSelected" class="text-red-600">(Your Answer)</span>
@@ -228,7 +235,8 @@
                             </div>
                         </div>
 
-                        <div class="prose max-w-none text-gray-700 text-sm sm:text-base overflow-x-auto" v-html="explanation.content"></div>
+                        <div class="prose max-w-none text-gray-700 text-sm sm:text-base overflow-x-auto"
+                            v-html="explanation.content"></div>
                     </div>
                 </div>
             </div>
@@ -240,12 +248,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <!-- Your Answer -->
                     <div class="bg-white border-2 rounded-xl p-4 sm:p-6"
-                        :class="isCorrect ? 'border-green-200' : 'border-red-200'">
-                        <h5 class="font-semibold text-base sm:text-lg mb-3" :class="isCorrect ? 'text-green-700' : 'text-red-700'">
+                        :class="localIsCorrect ? 'border-green-200' : 'border-red-200'">
+                        <h5 class="font-semibold text-base sm:text-lg mb-3"
+                            :class="localIsCorrect ? 'text-green-700' : 'text-red-700'">
                             Your Answer
                         </h5>
                         <div class="text-lg sm:text-xl font-mono bg-gray-50 rounded-lg p-3 sm:p-4"
-                            :class="isCorrect ? 'text-green-600' : 'text-red-600'">
+                            :class="localIsCorrect ? 'text-green-600' : 'text-red-600'">
                             {{ localSelectedAnswer || 'No answer provided' }}
                         </div>
                     </div>
@@ -267,24 +276,35 @@
                 <!-- Explanation -->
                 <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
                     <h5 class="font-semibold text-base sm:text-lg text-gray-800 mb-4">Explanation</h5>
-                    <div class="prose max-w-none text-gray-700 text-sm sm:text-base overflow-x-auto" v-html="explanation"></div>
+                    <div class="prose max-w-none text-gray-700 text-sm sm:text-base overflow-x-auto"
+                        v-html="localExplanation"></div>
                 </div>
             </div>
 
             <!-- Next Question Button -->
-            <div class="text-center pt-4 sm:pt-6">
+            <div class="text-center pt-4 sm:pt-6 overflow-hidden">
                 <button @click="nextQuestion"
-                    class="w-full sm:w-auto px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center text-sm sm:text-base">
+                    class="w-full sm:w-auto px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg sm:rounded-xl hover:shadow-lg transition-shadow duration-300 flex items-center justify-center text-sm sm:text-base">
                     <Icon icon="lucide:arrow-right" class="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
                     Next Question
                 </button>
             </div>
         </div>
+
+        <!-- Debug Info (remove in production) -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-xs">
+            <p><strong>Debug Info:</strong></p>
+            <p>Local Selected Answer: {{ localSelectedAnswer }}</p>
+            <p>Props Selected Answer: {{ selectedAnswer }}</p>
+            <p>Local Show Feedback: {{ localShowFeedback }}</p>
+            <p>Props Show Feedback: {{ showFeedback }}</p>
+            <p>Question ID: {{ currentQuestion?.external_id }}</p>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import { parseCollegeBoardExplanation, checkAnswer as checkAnswerUtil } from '../utils/enhancedPracticeUtils'
 
@@ -307,6 +327,9 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     'update:selectedAnswer': [value: string]
+    'update:showFeedback': [value: boolean]
+    'update:isCorrect': [value: boolean]
+    'update:explanation': [value: string]
     'check-answer': []
     'skip-question': []
     'next-question': []
@@ -314,16 +337,54 @@ const emit = defineEmits<{
     'go-to-next': []
 }>()
 
-const localSelectedAnswer = ref(props.currentQuestion.userAnswer || props.selectedAnswer)
+const localSelectedAnswer = ref('')
+const localShowFeedback = ref(false)
+const localIsCorrect = ref(false)
+const localExplanation = ref('')
+const isLoadingProgress = ref(false)
+
+// 添加清理HTML内容的函数
+const cleanQuestionContent = (htmlContent: string): string => {
+    if (!htmlContent) return ''
+
+    // 创建一个临时的DOM元素来解析HTML
+    const tempDiv = document.createElement('div')
+    tempDiv.innerHTML = htmlContent
+
+    // 移除所有带有 sr-only 类的元素（屏幕阅读器专用文本）
+    const srOnlyElements = tempDiv.querySelectorAll('.sr-only')
+    srOnlyElements.forEach(element => element.remove())
+
+    // 移除所有带有 aria-hidden="true" 且内容为下划线的span元素后面的多余文本
+    const ariaHiddenElements = tempDiv.querySelectorAll('span[aria-hidden="true"]')
+    ariaHiddenElements.forEach(element => {
+        // 如果下一个兄弟节点是包含"blank"的sr-only元素，也会被上面的代码移除
+        // 这里我们确保下划线显示正确
+        if (element.textContent && element.textContent.includes('_')) {
+            // 保持下划线元素不变
+        }
+    })
+
+    return tempDiv.innerHTML
+}
+
+// 添加计算属性来清理题目内容
+const cleanedStimulus = computed(() => {
+    return cleanQuestionContent(props.currentQuestion.stimulus || '')
+})
+
+const cleanedStem = computed(() => {
+    return cleanQuestionContent(props.currentQuestion.stem || '')
+})
 
 // Enhanced MCQ explanation parser using the new utility
 const parsedMCQExplanation = computed(() => {
-    if (props.currentQuestion.type !== 'mcq' || !props.explanation) return []
+    if (props.currentQuestion.type !== 'mcq' || !localExplanation.value) return []
 
     return parseCollegeBoardExplanation(
-        props.explanation,
+        localExplanation.value,
         props.currentQuestion.correct_answer[0],
-        props.selectedAnswer,
+        localSelectedAnswer.value,
         props.currentQuestion.answerOptions
     )
 })
@@ -333,11 +394,15 @@ const isCorrectOption = (optionId: string): boolean => {
 }
 
 const selectOption = (optionId: string) => {
-    localSelectedAnswer.value = optionId
+    // Only allow selection if feedback is not shown and not currently loading
+    if (!localShowFeedback.value && !isLoadingProgress.value) {
+        console.log('Selecting option:', optionId)
+        localSelectedAnswer.value = optionId
+    }
 }
 
 const getOptionClasses = (optionId: string, _index: number) => {
-    if (!props.showFeedback) {
+    if (!localShowFeedback.value) {
         return localSelectedAnswer.value === optionId
             ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 shadow-md'
             : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
@@ -345,14 +410,14 @@ const getOptionClasses = (optionId: string, _index: number) => {
 
     if (isCorrectOption(optionId)) {
         return 'border-green-500 bg-gradient-to-r from-green-50 to-emerald-50'
-    } else if (props.selectedAnswer === optionId) {
+    } else if (localSelectedAnswer.value === optionId) {
         return 'border-red-500 bg-gradient-to-r from-red-50 to-pink-50'
     }
     return 'border-gray-200 bg-gray-50'
 }
 
 const getOptionIndicatorClasses = (optionId: string) => {
-    if (!props.showFeedback) {
+    if (!localShowFeedback.value) {
         return localSelectedAnswer.value === optionId
             ? 'border-blue-500 bg-blue-500 text-white'
             : 'border-gray-300 bg-white text-gray-600'
@@ -360,7 +425,7 @@ const getOptionIndicatorClasses = (optionId: string) => {
 
     if (isCorrectOption(optionId)) {
         return 'border-green-500 bg-green-500 text-white'
-    } else if (props.selectedAnswer === optionId) {
+    } else if (localSelectedAnswer.value === optionId) {
         return 'border-red-500 bg-red-500 text-white'
     }
     return 'border-gray-300 bg-gray-100 text-gray-500'
@@ -393,19 +458,59 @@ const getExplanationTitleClasses = (explanation: any) => {
     return 'text-gray-700'
 }
 
-watch(() => props.selectedAnswer, (newValue) => {
-    localSelectedAnswer.value = newValue
-})
-
+// Watch for local changes and emit to parent
 watch(localSelectedAnswer, (newValue) => {
+    console.log('Local selected answer changed:', newValue)
     emit('update:selectedAnswer', newValue)
 })
 
-watch(() => props.currentQuestion, (newQ) => {
-    localSelectedAnswer.value = newQ.userAnswer || ''
+// 监听父组件传入的 props 并同步到本地状态
+watch(() => props.selectedAnswer, (newValue) => {
+    console.log('QuestionArea: selectedAnswer prop changed to', newValue)
+    localSelectedAnswer.value = newValue
+}, { immediate: true })
+
+watch(() => props.showFeedback, (newValue) => {
+    console.log('QuestionArea: showFeedback prop changed to', newValue)
+    localShowFeedback.value = newValue
+}, { immediate: true })
+
+watch(() => props.isCorrect, (newValue) => {
+    console.log('QuestionArea: isCorrect prop changed to', newValue)
+    localIsCorrect.value = newValue
+}, { immediate: true })
+
+watch(() => props.explanation, (newValue) => {
+    console.log('QuestionArea: explanation prop changed')
+    localExplanation.value = newValue
+}, { immediate: true })
+
+// 监听本地状态变化并向父组件发送更新
+watch(localShowFeedback, (newValue) => {
+    console.log('QuestionArea: localShowFeedback changed to', newValue)
+    emit('update:showFeedback', newValue)
 })
 
+watch(localIsCorrect, (newValue) => {
+    console.log('QuestionArea: localIsCorrect changed to', newValue)
+    emit('update:isCorrect', newValue)
+})
+
+watch(localExplanation, (newValue) => {
+    console.log('QuestionArea: localExplanation changed')
+    emit('update:explanation', newValue)
+})
+
+// 简化问题变更监听，不再在这里处理状态加载
+watch(() => props.currentQuestion?.external_id, async (newQuestionId, oldQuestionId) => {
+    if (newQuestionId && newQuestionId !== oldQuestionId) {
+        console.log('QuestionArea: Question changed from', oldQuestionId, 'to', newQuestionId)
+        // 让父组件完全控制状态，这里不做任何状态重置或加载
+    }
+}, { immediate: true })
+
 const checkAnswer = () => {
+    console.log('QuestionArea: Check answer clicked with:', localSelectedAnswer.value)
     emit('check-answer')
 }
 
@@ -416,12 +521,19 @@ const skipQuestion = () => {
 const nextQuestion = () => {
     emit('next-question')
 }
+
+// 移除 onMounted 中的状态加载，让父组件完全控制
+onMounted(async () => {
+    await nextTick()
+    // 不在这里加载进度，完全依赖父组件传入的 props
+})
 </script>
 
 <style scoped>
 .prose img {
     margin: 1rem auto;
-    max-width: none; /* Allow images to be wider than container */
+    max-width: none;
+    /* Allow images to be wider than container */
     height: auto;
 }
 
@@ -440,15 +552,22 @@ const nextQuestion = () => {
     .prose {
         font-size: 14px;
     }
-    
-    .prose h1, .prose h2, .prose h3 {
+
+    .prose h1,
+    .prose h2,
+    .prose h3 {
         font-size: 1.1em;
     }
-    
+
     .prose table,
     .prose pre,
     .prose img {
         max-width: none;
     }
+}
+
+/* Prevent layout shifts from hover effects */
+.overflow-hidden {
+    overflow: hidden;
 }
 </style>

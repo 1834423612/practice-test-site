@@ -344,8 +344,8 @@ const paginatedQuestions = computed(() => {
   return filteredWrongQuestions.value.slice(start, end)
 })
 
-const loadWrongQuestions = () => {
-  wrongQuestions.value = getWrongQuestions()
+const loadWrongQuestions = async () => {
+  wrongQuestions.value = await getWrongQuestions()
 }
 
 const removeWrongQuestion = (externalId: string) => {
@@ -404,8 +404,8 @@ const formatDate = (timestamp: number): string => {
   })
 }
 
-const exportData = () => {
-  const data = exportWrongQuestions()
+const exportData = async () => {
+  const data = await exportWrongQuestions()
   const blob = new Blob([data], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -423,10 +423,10 @@ const handleFileImport = (event: Event) => {
   if (!file) return
 
   const reader = new FileReader()
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     try {
       const content = e.target?.result as string
-      if (importWrongQuestions(content)) {
+      if (await importWrongQuestions(content)) {
         loadWrongQuestions()
         alert('Data imported successfully!')
       } else {
@@ -445,8 +445,8 @@ const handleWrongQuestionsUpdate = () => {
   loadWrongQuestions()
 }
 
-onMounted(() => {
-  loadWrongQuestions()
+onMounted(async () => {
+  await loadWrongQuestions()
   onWrongQuestionsUpdate(handleWrongQuestionsUpdate)
 })
 

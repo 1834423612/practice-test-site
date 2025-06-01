@@ -330,7 +330,11 @@ const visibleCount = 8
 const scrollTop = ref(0)
 
 // Progress tracking
-const questionProgress = ref(getQuestionProgress())
+interface PracticeProgress {
+  answered: boolean;
+  isCorrect: boolean;
+}
+const questionProgress = ref<Record<string, PracticeProgress>>({})
 
 // Computed properties
 const totalQuestions = computed(() => props.questions.length)
@@ -469,8 +473,8 @@ const getQuestionNumberClass = (question: any, originalIndex: number) => {
 }
 
 // Update progress when questions change
-watch(() => props.questions, () => {
-  questionProgress.value = getQuestionProgress()
+watch(() => props.questions, async () => {
+  questionProgress.value = await getQuestionProgress()
 }, { deep: true })
 
 // 监听 isOpen 变化并更新位置
@@ -502,10 +506,13 @@ const handleWindowScroll = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('keydown', handleKeydown)
   window.addEventListener('resize', handleResize)
   window.addEventListener('scroll', handleWindowScroll, true)
+  
+  // 异步初始化 progress 数据
+  questionProgress.value = await getQuestionProgress()
   
   // 初始化滚动位置
   if (scrollContainer.value) {

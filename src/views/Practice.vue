@@ -224,6 +224,10 @@ const domainPerformance = ref<Record<string, any>>({})
 const showWrongQuestions = ref(false)
 const wrongQuestionsCount = ref(0)
 
+// Store the selected domains for fallback
+const selectedDomains = ref<string[]>([])
+const selectedTestType = ref<number>(1)
+
 // Computed properties
 const currentQuestion = computed(() => {
     return questions.value[currentQuestionIndex.value]
@@ -292,6 +296,10 @@ const handleStartPractice = async (settings: any) => {
     timerDuration.value = settings.timerDuration
     loading.value = true
 
+    // Store selected domains and test type for fallback
+    selectedDomains.value = settings.selectedDomains
+    selectedTestType.value = settings.selectedTest
+
     // Reset timer state
     resetTimer()
     elapsedTime.value = 0
@@ -359,6 +367,59 @@ const loadNextQuestion = async () => {
     }
 }
 
+// Helper function to determine domain from question data
+const determineDomain = (question: any): string => {
+    // First, try to use the question's domain field
+    if (question.domain && question.domain.trim() !== '') {
+        return question.domain
+    }
+
+    // If domain is empty, try to infer from selected domains
+    if (selectedDomains.value.length === 1) {
+        // If only one domain was selected, use that
+        return selectedDomains.value[0]
+    }
+
+    // Try to infer from test type and question content
+    if (selectedTestType.value === 2) {
+        // Math test - try to determine specific domain
+        const stem = (question.stem || '').toLowerCase()
+        const stimulus = (question.stimulus || '').toLowerCase()
+        const content = stem + ' ' + stimulus
+
+        if (content.includes('algebra') || content.includes('linear') || content.includes('equation')) {
+            return 'H' // Algebra
+        } else if (content.includes('function') || content.includes('polynomial') || content.includes('exponential')) {
+            return 'P' // Advanced Math
+        } else if (content.includes('data') || content.includes('statistics') || content.includes('probability')) {
+            return 'Q' // Problem-Solving and Data Analysis
+        } else if (content.includes('geometry') || content.includes('trigonometry') || content.includes('triangle')) {
+            return 'S' // Geometry and Trigonometry
+        } else {
+            // Default to first selected math domain or general math
+            return selectedDomains.value.find(d => ['H', 'P', 'Q', 'S'].includes(d)) || 'H'
+        }
+    } else {
+        // Reading and Writing test
+        const stem = (question.stem || '').toLowerCase()
+        const stimulus = (question.stimulus || '').toLowerCase()
+        const content = stem + ' ' + stimulus
+
+        if (content.includes('main idea') || content.includes('central claim') || content.includes('purpose')) {
+            return 'INI' // Information and Ideas
+        } else if (content.includes('structure') || content.includes('craft') || content.includes('word choice')) {
+            return 'CAS' // Craft and Structure
+        } else if (content.includes('expression') || content.includes('revision') || content.includes('transition')) {
+            return 'EOI' // Expression of Ideas
+        } else if (content.includes('grammar') || content.includes('punctuation') || content.includes('convention')) {
+            return 'SEC' // Standard English Conventions
+        } else {
+            // Default to first selected English domain or general reading
+            return selectedDomains.value.find(d => ['INI', 'CAS', 'EOI', 'SEC'].includes(d)) || 'INI'
+        }
+    }
+}
+
 const checkAnswer = async () => {
     const question = currentQuestion.value
 
@@ -413,7 +474,11 @@ const checkAnswer = async () => {
         console.log('Saving progress data:', progressData)
         await saveQuestionProgress(question.external_id, progressData)
 
-        updateDomainPerformance(question.domain, isCorrect.value)
+        // Determine the domain for this question
+        const questionDomain = determineDomain(question)
+        console.log('Determined domain for question:', questionDomain)
+        
+        updateDomainPerformance(questionDomain, isCorrect.value)
 
         // Force a UI update by creating a small delay
         await new Promise(resolve => setTimeout(resolve, 50))
@@ -554,6 +619,8 @@ const restartPractice = () => {
     correctAnswers.value = 0
     incorrectAnswers.value = 0
     domainPerformance.value = {}
+    selectedDomains.value = []
+    selectedTestType.value = 1
 
     if (timerInterval.value !== null) {
         clearInterval(timerInterval.value)
@@ -581,13 +648,35 @@ const startTimer = () => {
 }
 
 const updateDomainPerformance = (domain: string, isCorrect: boolean) => {
-    if (!domainPerformance.value[domain]) {
-        domainPerformance.value[domain] = { id: domain, correct: 0, total: 0, name: domain }
+    // Ensure domain is not empty or undefined
+    if (!domain || domain.trim() === '') {
+        console.warn('Domain is empty, skipping performance update')
+        return
     }
+
+    if (!domainPerformance.value[domain]) {
+        // Get domain name from our predefined lists
+        const getDomainName = (domainId: string): string => {
+            const allDomains = [...englishDomains.value, ...mathDomains.value]
+            const domainInfo = allDomains.find(d => d.id === domainId)
+            return domainInfo ? domainInfo.name : domainId
+        }
+
+        domainPerformance.value[domain] = { 
+            id: domain,
+            name: getDomainName(domain),
+            correct: 0, 
+            total: 0 
+        }
+    }
+    
     domainPerformance.value[domain].total++
     if (isCorrect) {
         domainPerformance.value[domain].correct++
     }
+    
+    // 添加调试日志
+    console.log('Updated domain performance:', domain, domainPerformance.value[domain])
 }
 
 const startWrongQuestionsPractice = (wrongQuestions: any[]) => {

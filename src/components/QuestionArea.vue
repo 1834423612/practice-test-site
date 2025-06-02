@@ -292,7 +292,7 @@
         </div>
 
         <!-- Debug Info (remove in production) -->
-        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-xs">
+        <div v-if="showDebug" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-xs">
             <p><strong>Debug Info:</strong></p>
             <p>Local Selected Answer: {{ localSelectedAnswer }}</p>
             <p>Props Selected Answer: {{ selectedAnswer }}</p>
@@ -307,6 +307,9 @@
 import { ref, watch, computed, onMounted, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import { parseCollegeBoardExplanation, checkAnswer as checkAnswerUtil } from '../utils/enhancedPracticeUtils'
+
+// Automatically enable debug mode only in development environment
+const showDebug = ref(import.meta.env.DEV)
 
 const props = defineProps<{
     currentQuestion: any

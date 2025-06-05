@@ -52,6 +52,16 @@
               <Icon icon="lucide:info" class="w-4 h-4 mr-2" />
               About
             </router-link>
+            
+            <!-- 新增：Desktop Contact Link -->
+            <router-link 
+              to="/contact" 
+              class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 flex items-center"
+              :class="{ 'text-blue-600 bg-blue-50 rounded-lg': $route.path === '/contact' }"
+            >
+              <Icon icon="lucide:phone" class="w-4 h-4 mr-2" />
+              Contact
+            </router-link>
           </div>
 
           <!-- Mobile Menu Button -->
@@ -67,7 +77,7 @@
                 {{ wrongQuestionsCount > 9 ? '9+' : wrongQuestionsCount }}
               </span>
             </button>
-
+    
             <!-- Mobile Menu Toggle -->
             <button
               @click="showMobileMenu = !showMobileMenu"
@@ -77,7 +87,7 @@
             </button>
           </div>
         </div>
-
+    
         <!-- Mobile Menu -->
         <div v-if="showMobileMenu" class="md:hidden border-t border-gray-200 py-4">
           <div class="flex flex-col space-y-2">
@@ -188,6 +198,15 @@ const wrongQuestionsCount = ref(0)
 const showWrongQuestions = ref(false)
 const showMobileMenu = ref(false)
 
+// 新增：判断是否为移动端
+const isMobile = ref(window.innerWidth < 768)
+function handleResize() {
+  isMobile.value = window.innerWidth < 768
+  if (!isMobile.value) {
+    showMobileMenu.value = false
+  }
+}
+
 const updateWrongQuestionsCount = async () => {
   wrongQuestionsCount.value = (await getWrongQuestions()).length
 }
@@ -224,10 +243,12 @@ updateWrongQuestionsCount()
 // Set up reactive updates
 onMounted(() => {
   onWrongQuestionsUpdate(updateWrongQuestionsCount)
+  window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
   offWrongQuestionsUpdate(updateWrongQuestionsCount)
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 

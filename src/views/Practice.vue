@@ -1,6 +1,37 @@
 <template>
     <div class="min-h-screen mt-2 sm:mt-6">
         <div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-0">
+            <!-- Practice Exit Warning Modal with improved styling -->
+            <div v-if="showExitWarning" class="fixed inset-0 flex items-center justify-center z-[80] p-4 backdrop-blur-sm">
+                <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl transform transition-all duration-300 scale-100">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Icon icon="lucide:alert-triangle" class="w-8 h-8 text-red-600" />
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Practice Session Active</h3>
+                        <p class="text-gray-600 mb-6">
+                            You have an active practice session. Leaving now will end your current progress.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button
+                                @click="confirmExit"
+                                class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium"
+                                data-umami-event="end-practice-click"
+                            >
+                                End Practice
+                            </button>
+                            <button
+                                @click="cancelExit"
+                                class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium"
+                                data-umami-event="continue-practice-click"
+                            >
+                                Continue Practice
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Header with Timer, Stats, and Controls -->
             <div v-if="started && !practiceEnded"
                 class="mb-4 sm:mb-6 bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3 sm:p-4 shadow-sm z-[35] relative">
@@ -10,20 +41,19 @@
                     <!-- Top row: Timer and Question Counter with Navigator -->
                     <div class="flex items-center justify-between">
                         <!-- Timer -->
-                        <div v-if="useTimer" class="flex items-center space-x-1 text-gray-700 font-semibold">
+                        <div v-if="useTimer" class="flex items-center space-x-1 text-gray-700 font-semibold" data-umami-event="timer-display-click">
                             <Icon :icon="timerType === 'countdown' ? 'lucide:timer' : 'lucide:clock'" class="w-4 h-4" />
-                            <span class="text-sm">{{ formatTime(timerType === 'countdown' ? remainingTime : elapsedTime)
-                            }}</span>
+                            <span class="text-sm">{{ formatTime(timerType === 'countdown' ? remainingTime : elapsedTime) }}</span>
                         </div>
 
                         <!-- Question Counter with Navigator -->
                         <QuestionNavigator v-if="questions.length > 0" :questions="questions"
                             :currentQuestionIndex="currentQuestionIndex" @go-to-question="goToQuestion"
-                            @go-to-previous="goToPrevious" @go-to-next="goToNext" />
+                            @go-to-previous="goToPrevious" @go-to-next="goToNext" data-umami-event="question-navigator-click" />
                     </div>
 
                     <!-- Progress Bar -->
-                    <div class="w-full">
+                    <div class="w-full" data-umami-event="progress-bar-click">
                         <div class="flex items-center justify-between text-xs text-gray-600 mb-1">
                             <span>Progress</span>
                             <span>{{ sessionStats.answeredQuestions }}/{{ sessionStats.totalQuestions }}</span>
@@ -38,15 +68,17 @@
                     <div class="flex items-center space-x-2">
                         <!-- Wrong Questions Button -->
                         <button @click="showWrongQuestions = true"
-                            class="flex-1 px-2 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 flex items-center justify-center text-xs">
+                            class="flex-1 px-2 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 flex items-center justify-center text-xs"
+                            data-umami-event="wrong-questions-click">
                             <Icon icon="lucide:x-circle" class="w-3 h-3 mr-1" />
                             <span>Wrong ({{ wrongQuestionsCount }})</span>
                         </button>
 
                         <!-- End Practice Button -->
                         <button @click="confirmEndPractice"
-                            class="flex-1 px-2 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors duration-200 text-xs">
-                            <span>End</span>
+                            class="flex-1 px-2 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors duration-200 text-xs"
+                            data-umami-event="end-practice-button-click">
+                            End
                         </button>
                     </div>
                 </div>
@@ -56,30 +88,31 @@
                     <!-- Left side: Timer and Question Counter -->
                     <div class="flex items-center space-x-6">
                         <!-- Timer -->
-                        <div v-if="useTimer" class="flex items-center space-x-2 text-gray-700 font-semibold">
+                        <div v-if="useTimer" class="flex items-center space-x-2 text-gray-700 font-semibold" data-umami-event="timer-display-click">
                             <Icon :icon="timerType === 'countdown' ? 'lucide:timer' : 'lucide:clock'" class="w-5 h-5" />
-                            <span class="text-lg">{{ formatTime(timerType === 'countdown' ? remainingTime : elapsedTime)
-                            }}</span>
+                            <span class="text-lg">{{ formatTime(timerType === 'countdown' ? remainingTime : elapsedTime) }}</span>
                         </div>
 
                         <!-- Question Counter with Navigator -->
                         <QuestionNavigator v-if="questions.length > 0" :questions="questions"
                             :currentQuestionIndex="currentQuestionIndex" @go-to-question="goToQuestion"
-                            @go-to-previous="goToPrevious" @go-to-next="goToNext" />
+                            @go-to-previous="goToPrevious" @go-to-next="goToNext" data-umami-event="question-navigator-click" />
                     </div>
 
                     <!-- Right side: Action buttons -->
                     <div class="flex items-center space-x-4">
                         <!-- Wrong Questions Button -->
                         <button @click="showWrongQuestions = true"
-                            class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 flex items-center text-sm">
+                            class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 flex items-center text-sm"
+                            data-umami-event="wrong-questions-click">
                             <Icon icon="lucide:x-circle" class="w-4 h-4 mr-2" />
                             Wrong Questions ({{ wrongQuestionsCount }})
                         </button>
 
                         <!-- End Practice Button -->
                         <button @click="confirmEndPractice"
-                            class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors duration-200 text-sm">
+                            class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors duration-200 text-sm"
+                            data-umami-event="end-practice-button-click">
                             End Practice
                         </button>
                     </div>
@@ -125,21 +158,26 @@
                 </div>
             </div>
 
-            <!-- Wrong Questions Manager Modal -->
+            <!-- Wrong Questions Manager Modal with improved styling -->
             <div v-if="showWrongQuestions"
-                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
-                <div class="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
+                class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[70] p-4 backdrop-blur-sm">
+                <div class="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl">
                     <div class="p-4 border-b border-gray-200 flex justify-between items-center">
                         <h3 class="text-xl font-semibold text-gray-800">Wrong Questions Manager</h3>
-                        <button @click="showWrongQuestions = false"
-                            class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors duration-200">
+                        <button
+                            @click="showWrongQuestions = false"
+                            class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors duration-200"
+                            data-umami-event="close-wrong-questions-click"
+                        >
                             <Icon icon="lucide:x" class="w-4 h-4" />
                         </button>
                     </div>
                     <div class="overflow-y-auto max-h-[calc(90vh-80px)]">
                         <WrongQuestionsManager :isInPracticeMode="false"
                             @start-wrong-questions-practice="startWrongQuestionsPractice"
-                            @review-question="reviewQuestion" />
+                            @review-question="reviewQuestion"
+                            data-umami-event="wrong-questions-manager-click"
+                        />
                     </div>
                 </div>
             </div>
@@ -149,7 +187,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { setPracticeMode, allowNavigation } from '../router/index'
 import axios from 'axios'
 import { Icon } from '@iconify/vue'
 import Swal from 'sweetalert2'
@@ -171,8 +210,9 @@ import {
     offWrongQuestionsUpdate
 } from '../utils/enhancedPracticeUtils'
 
-// Get route for query parameters
+// Get route and router for navigation
 const route = useRoute()
+const router = useRouter()
 
 // Component state
 const assessmentTypes = ref([
@@ -223,10 +263,37 @@ const incorrectAnswers = ref(0)
 const domainPerformance = ref<Record<string, any>>({})
 const showWrongQuestions = ref(false)
 const wrongQuestionsCount = ref(0)
+const showExitWarning = ref(false)
 
 // Store the selected domains for fallback
 const selectedDomains = ref<string[]>([])
 const selectedTestType = ref<number>(1)
+
+// Practice mode management with enhanced navigation control
+const setPracticeModeActive = (active: boolean) => {
+    setPracticeMode(active, () => {
+        showExitWarning.value = true
+    })
+}
+
+const confirmExit = () => {
+    showExitWarning.value = false
+    setPracticeModeActive(false)
+    
+    // Allow navigation before redirecting
+    allowNavigation()
+    
+    endPractice()
+    router.push('/')
+}
+
+const cancelExit = () => {
+    showExitWarning.value = false
+    // Push current state again to maintain protection
+    if (typeof window !== 'undefined') {
+        history.pushState(null, '', window.location.pathname)
+    }
+}
 
 // Computed properties
 const currentQuestion = computed(() => {
@@ -244,7 +311,7 @@ const sessionStats = computed(() => {
     }
 })
 
-// IndexedDB helper functions to replace localStorage
+// IndexedDB helper functions
 const getCompletedQuestions = async (): Promise<string[]> => {
     try {
         const progress = await getQuestionProgress()
@@ -255,24 +322,8 @@ const getCompletedQuestions = async (): Promise<string[]> => {
     }
 }
 
-// const saveCompletedQuestion = async (questionId: string) => {
-//     try {
-//         await saveQuestionProgress(questionId, {
-//             questionId,
-//             answered: true,
-//             isCorrect: false, // Will be updated when actually answered
-//             userAnswer: '',
-//             timestamp: Date.now()
-//         })
-//     } catch (error) {
-//         console.error('Error saving completed question:', error)
-//     }
-// }
-
 const clearCompletedQuestions = async () => {
     try {
-        // This would need to be implemented in enhancedPracticeUtils.ts
-        // For now, we'll just log it
         console.log('Clear completed questions requested')
     } catch (error) {
         console.error('Error clearing completed questions:', error)
@@ -295,6 +346,9 @@ const handleStartPractice = async (settings: any) => {
     timerType.value = settings.timerType
     timerDuration.value = settings.timerDuration
     loading.value = true
+
+    // Activate practice mode protection
+    setPracticeModeActive(true)
 
     // Store selected domains and test type for fallback
     selectedDomains.value = settings.selectedDomains
@@ -320,6 +374,7 @@ const handleStartPractice = async (settings: any) => {
     } catch (error) {
         console.error('Error starting practice:', error)
         loading.value = false
+        setPracticeModeActive(false)
         Swal.fire({
             icon: 'error',
             title: 'Oops...',
@@ -431,19 +486,10 @@ const checkAnswer = async () => {
     console.log('Checking answer:', selectedAnswer.value, 'for question:', question.external_id)
 
     try {
-        // Use the fixed answer checking logic
         isCorrect.value = checkAnswerUtil(question, selectedAnswer.value)
         showFeedback.value = true
         explanation.value = question.rationale || ''
 
-        console.log('Answer check result:', {
-            isCorrect: isCorrect.value,
-            showFeedback: showFeedback.value,
-            explanation: explanation.value ? 'Has content' : 'Empty',
-            selectedAnswer: selectedAnswer.value
-        })
-
-        // Update question state
         question.userAnswer = selectedAnswer.value
         question.answered = true
         question.isCorrect = isCorrect.value
@@ -455,43 +501,27 @@ const checkAnswer = async () => {
             correctAnswers.value++
         } else {
             incorrectAnswers.value++
-            // Save to wrong questions if incorrect
-            console.log('Saving wrong question to collection')
             await saveWrongQuestion(question, selectedAnswer.value)
-            await updateWrongQuestionsCount() // Update count immediately
+            await updateWrongQuestionsCount()
         }
 
-        // Save progress to IndexedDB - 确保保存正确的用户答案
         const progressData = {
             questionId: question.external_id,
             answered: true,
             isCorrect: isCorrect.value,
-            userAnswer: selectedAnswer.value, // 确保这里保存的是实际选择的答案
+            userAnswer: selectedAnswer.value,
             timestamp: Date.now(),
-            checked: true // 添加 checked 标志
+            checked: true
         }
 
-        console.log('Saving progress data:', progressData)
         await saveQuestionProgress(question.external_id, progressData)
 
-        // Determine the domain for this question
         const questionDomain = determineDomain(question)
-        console.log('Determined domain for question:', questionDomain)
-        
         updateDomainPerformance(questionDomain, isCorrect.value)
 
-        // Force a UI update by creating a small delay
         await new Promise(resolve => setTimeout(resolve, 50))
-
-        // Double-check state after saving
-        console.log('Final state after check:', {
-            showFeedback: showFeedback.value,
-            isCorrect: isCorrect.value,
-            selectedAnswer: selectedAnswer.value
-        })
     } catch (error) {
         console.error('Error checking answer:', error)
-        // Try to recover from error
         showFeedback.value = true
         explanation.value = question.rationale || 'Explanation not available'
     }
@@ -514,12 +544,9 @@ const skipQuestion = () => {
 
 const goToQuestion = async (index: number) => {
     if (index >= 0 && index < questions.value.length) {
-        console.log('Navigating to question index:', index)
-
         currentQuestionIndex.value = index
         const nextQ = questions.value[index]
 
-        // Reset state first
         selectedAnswer.value = ''
         showFeedback.value = false
         isCorrect.value = false
@@ -529,37 +556,20 @@ const goToQuestion = async (index: number) => {
         await loadNextQuestion()
         loading.value = false
 
-        // Now load saved state from IndexedDB
         try {
             const progress = await getQuestionProgress()
             const savedProgress = progress[nextQ.external_id]
 
-            console.log('Loading saved progress for question:', nextQ.external_id, savedProgress)
-
             if (savedProgress && savedProgress.answered) {
-                // 恢复用户选择的答案
                 selectedAnswer.value = savedProgress.userAnswer || ''
 
-                // 如果问题已经被检查过，恢复反馈状态
                 if (savedProgress.checked) {
                     isCorrect.value = savedProgress.isCorrect || false
                     explanation.value = nextQ.rationale || ''
 
-                    // 延迟设置 showFeedback 以确保其他状态先更新
                     await new Promise(resolve => setTimeout(resolve, 100))
                     showFeedback.value = true
-
-                    console.log('Restored complete state:', {
-                        selectedAnswer: selectedAnswer.value,
-                        showFeedback: showFeedback.value,
-                        isCorrect: isCorrect.value,
-                        explanation: explanation.value ? 'Has content' : 'Empty'
-                    })
-                } else {
-                    console.log('Question answered but not checked, only restoring answer:', selectedAnswer.value)
                 }
-            } else {
-                console.log('No saved progress found for question:', nextQ.external_id)
             }
         } catch (error) {
             console.error('Error loading question progress:', error)
@@ -603,10 +613,10 @@ const endPractice = () => {
         timerInterval.value = null
     }
     practiceEnded.value = true
+    setPracticeModeActive(false)
 }
 
 const restartPractice = () => {
-    // Reset all state
     started.value = false
     currentQuestionIndex.value = 0
     questions.value = []
@@ -627,7 +637,7 @@ const restartPractice = () => {
         timerInterval.value = null
     }
 
-    // Reset timer state
+    setPracticeModeActive(false)
     resetTimer()
 }
 
@@ -674,9 +684,6 @@ const updateDomainPerformance = (domain: string, isCorrect: boolean) => {
     if (isCorrect) {
         domainPerformance.value[domain].correct++
     }
-    
-    // 添加调试日志
-    console.log('Updated domain performance:', domain, domainPerformance.value[domain])
 }
 
 const startWrongQuestionsPractice = (wrongQuestions: any[]) => {
@@ -694,6 +701,7 @@ const startWrongQuestionsPractice = (wrongQuestions: any[]) => {
     showWrongQuestions.value = false
     started.value = true
     practiceEnded.value = false
+    setPracticeModeActive(true)
 }
 
 const reviewQuestion = (question: any) => {
@@ -706,6 +714,7 @@ const reviewQuestion = (question: any) => {
     showWrongQuestions.value = false
     started.value = true
     practiceEnded.value = false
+    setPracticeModeActive(true)
 }
 
 // Load wrong questions from URL query parameters
@@ -789,28 +798,6 @@ const loadReviewQuestionFromQuery = async () => {
     }
 }
 
-// Add watchers to debug state changes
-watch(showFeedback, (newVal) => {
-    console.log('showFeedback changed to:', newVal)
-})
-
-watch(isCorrect, (newVal) => {
-    console.log('isCorrect changed to:', newVal)
-})
-
-watch(explanation, (newVal) => {
-    console.log('explanation changed:', newVal ? 'Has content' : 'Empty')
-})
-
-watch(selectedAnswer, (newVal) => {
-    console.log('selectedAnswer changed to:', newVal)
-})
-
-// Watch for question changes to reset state
-watch(currentQuestionIndex, () => {
-    // Don't reset state here as it's handled in goToQuestion
-})
-
 // Watch for route query changes
 watch(() => route.query, (newQuery) => {
     if (newQuery.mode === 'wrong-questions' && newQuery.questions) {
@@ -838,6 +825,7 @@ onUnmounted(() => {
     if (timerInterval.value !== null) {
         clearInterval(timerInterval.value)
     }
+    setPracticeModeActive(false)
     offWrongQuestionsUpdate(updateWrongQuestionsCount)
 })
 </script>
@@ -846,10 +834,8 @@ onUnmounted(() => {
 .prose img {
     margin: 1rem auto;
     max-width: none;
-    /* Allow images to be wider than container */
 }
 
-/* Ensure content doesn't overflow on mobile */
 @media (max-width: 640px) {
     .prose {
         font-size: 14px;
@@ -865,7 +851,6 @@ onUnmounted(() => {
         margin-bottom: 0.75em;
     }
 
-    /* Allow horizontal scrolling for wide content */
     .prose table,
     .prose pre,
     .prose img {
@@ -873,11 +858,26 @@ onUnmounted(() => {
     }
 }
 
-/* Custom styles for action buttons on mobile */
 @media (max-width: 640px) {
     .question-actions button {
         font-size: 0.75rem;
         padding: 0.5rem 1rem;
     }
+}
+
+/* Enhanced modal animations */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.fixed.inset-0 > div {
+    animation: modalFadeIn 0.3s ease-out;
 }
 </style>

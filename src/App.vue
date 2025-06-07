@@ -1,160 +1,102 @@
 <template>
   <div id="app">
     <!-- Navigation Header -->
-    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <!-- Logo and Title -->
-          <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-            <router-link to="/" class="flex items-center space-x-2 sm:space-x-3">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <Icon icon="lucide:graduation-cap" class="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div class="hidden sm:block">
-                <h1 class="text-xl font-bold text-gray-800">SAT Practice</h1>
-                <p class="text-xs text-gray-500">Digital Test Preparation</p>
-              </div>
-              <div class="block sm:hidden">
-                <h1 class="text-xl font-bold text-gray-800">SAT Practice</h1>
-                <p class="text-xs text-gray-500">Digital Test Preparation</p>
-              </div>
-            </router-link>
-          </div>
-
-          <!-- Desktop Navigation Links -->
-          <div class="hidden md:flex items-center space-x-6">
-            <router-link 
-              to="/practice" 
-              class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 flex items-center"
-              :class="{ 'text-blue-600 bg-blue-50 rounded-lg': $route.path === '/practice' }"
-            >
-              <Icon icon="lucide:play-circle" class="w-4 h-4 mr-2" />
-              Practice
-            </router-link>
-
-            <button
-              @click="showWrongQuestions = true"
-              class="px-4 py-2 text-gray-700 hover:text-red-600 font-medium transition-colors duration-200 flex items-center relative"
-            >
-              <Icon icon="lucide:x-circle" class="w-4 h-4 mr-2" />
-              Wrong Questions
-              <span v-if="wrongQuestionsCount > 0" 
-                    class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                {{ wrongQuestionsCount > 99 ? '99+' : wrongQuestionsCount }}
-              </span>
-            </button>
-
-            <router-link 
-              to="/about" 
-              class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 flex items-center"
-              :class="{ 'text-blue-600 bg-blue-50 rounded-lg': $route.path === '/about' }"
-            >
-              <Icon icon="lucide:info" class="w-4 h-4 mr-2" />
-              About
-            </router-link>
-            
-            <!-- 新增：Desktop Contact Link -->
-            <router-link 
-              to="/contact" 
-              class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 flex items-center"
-              :class="{ 'text-blue-600 bg-blue-50 rounded-lg': $route.path === '/contact' }"
-            >
-              <Icon icon="lucide:phone" class="w-4 h-4 mr-2" />
-              Contact
-            </router-link>
-          </div>
-
-          <!-- Mobile Menu Button -->
-          <div class="md:hidden flex items-center space-x-2">
-            <!-- Wrong Questions Button (Mobile) -->
-            <button
-              @click="showWrongQuestions = true"
-              class="p-2 text-gray-700 hover:text-red-600 transition-colors duration-200 relative"
-            >
-              <Icon icon="lucide:x-circle" class="w-5 h-5" />
-              <span v-if="wrongQuestionsCount > 0" 
-                    class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                {{ wrongQuestionsCount > 9 ? '9+' : wrongQuestionsCount }}
-              </span>
-            </button>
-    
-            <!-- Mobile Menu Toggle -->
-            <button
-              @click="showMobileMenu = !showMobileMenu"
-              class="p-2 text-gray-700 hover:text-gray-900 transition-colors duration-200"
-            >
-              <Icon :icon="showMobileMenu ? 'lucide:x' : 'lucide:menu'" class="w-6 h-6" />
-            </button>
-          </div>
-        </div>
-    
-        <!-- Mobile Menu -->
-        <div v-if="showMobileMenu" class="md:hidden border-t border-gray-200 py-4">
-          <div class="flex flex-col space-y-2">
-            <router-link 
-              to="/practice" 
-              @click="showMobileMenu = false"
-              class="px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-colors duration-200 flex items-center rounded-lg"
-              :class="{ 'text-blue-600 bg-blue-50': $route.path === '/practice' }"
-            >
-              <Icon icon="lucide:play-circle" class="w-5 h-5 mr-3" />
-              Practice
-            </router-link>
-
-            <button
-              @click="showWrongQuestions = true; showMobileMenu = false"
-              class="px-4 py-3 text-gray-700 hover:text-red-600 hover:bg-red-50 font-medium transition-colors duration-200 flex items-center rounded-lg text-left w-full relative"
-            >
-              <Icon icon="lucide:x-circle" class="w-5 h-5 mr-3" />
-              Wrong Questions
-              <span v-if="wrongQuestionsCount > 0" 
-                    class="ml-auto px-2 py-1 bg-red-500 text-white text-xs rounded-full">
-                {{ wrongQuestionsCount > 99 ? '99+' : wrongQuestionsCount }}
-              </span>
-            </button>
-
-            <router-link 
-              to="/about" 
-              @click="showMobileMenu = false"
-              class="px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-colors duration-200 flex items-center rounded-lg"
-              :class="{ 'text-blue-600 bg-blue-50': $route.path === '/about' }"
-            >
-              <Icon icon="lucide:info" class="w-5 h-5 mr-3" />
-              About
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <AppHeader />
 
     <!-- Main Content -->
     <main class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
       <div class="max-w-7xl mx-auto">
-      <router-view />
+        <router-view />
       </div>
     </main>
 
-    <!-- Global Wrong Questions Manager Modal -->
-    <div v-if="showWrongQuestions" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
-      <div class="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
-        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 class="text-xl font-semibold text-gray-800">Wrong Questions Manager</h3>
-          <button
-            @click="showWrongQuestions = false"
-            class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors duration-200"
-          >
-            <Icon icon="lucide:x" class="w-4 h-4" />
-          </button>
-        </div>
-        <div class="overflow-y-auto max-h-[calc(90vh-80px)]">
-          <WrongQuestionsManager
-            :isInPracticeMode="false"
-            @start-wrong-questions-practice="startWrongQuestionsPractice"
-            @review-question="reviewQuestion"
-          />
-        </div>
+    <!-- Auth Modal -->
+    <AuthModal
+      v-if="showAuth"
+      @close="showAuth = false"
+      @success="handleAuthSuccess"
+    />
+
+    <!-- User Profile Modal -->
+    <Transition
+      enter-active-class="transition ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showProfile" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
+        <Transition
+          enter-active-class="transition ease-out duration-300"
+          enter-from-class="opacity-0 scale-95"
+          enter-to-class="opacity-100 scale-100"
+          leave-active-class="transition ease-in duration-200"
+          leave-from-class="opacity-100 scale-100"
+          leave-to-class="opacity-0 scale-95"
+        >
+          <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 class="text-xl font-semibold text-gray-800">User Profile</h3>
+              <button
+                @click="showProfile = false"
+                class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors duration-200"
+              >
+                <Icon icon="lucide:x" class="w-4 h-4" />
+              </button>
+            </div>
+            <div class="overflow-y-auto max-h-[calc(90vh-80px)] p-6">
+              <UserProfile
+                v-if="user"
+                :user="user"
+                @logout="handleLogout"
+              />
+            </div>
+          </div>
+        </Transition>
       </div>
-    </div>
+    </Transition>
+
+    <!-- Global Wrong Questions Manager Modal -->
+    <Transition
+      enter-active-class="transition ease-out duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showWrongQuestions" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
+        <Transition
+          enter-active-class="transition ease-out duration-300"
+          enter-from-class="opacity-0 scale-95"
+          enter-to-class="opacity-100 scale-100"
+          leave-active-class="transition ease-in duration-200"
+          leave-from-class="opacity-100 scale-100"
+          leave-to-class="opacity-0 scale-95"
+        >
+          <div class="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 class="text-xl font-semibold text-gray-800">Wrong Questions Manager</h3>
+              <button
+                @click="showWrongQuestions = false"
+                class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors duration-200"
+              >
+                <Icon icon="lucide:x" class="w-4 h-4" />
+              </button>
+            </div>
+            <div class="overflow-y-auto max-h-[calc(90vh-80px)]">
+              <WrongQuestionsManager
+                :isInPracticeMode="false"
+                @start-wrong-questions-practice="startWrongQuestionsPractice"
+                @review-question="reviewQuestion"
+                @show-auth="openAuthFromWrongQuestions"
+              />
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
 
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 mt-12">
@@ -184,34 +126,108 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
+import AppHeader from './components/AppHeader.vue'
+import AuthModal from './components/AuthModal.vue'
+import UserProfile from './components/UserProfile.vue'
 import WrongQuestionsManager from './components/WrongQuestionsManager.vue'
 import { 
   getWrongQuestions, 
   onWrongQuestionsUpdate, 
   offWrongQuestionsUpdate 
 } from './utils/enhancedPracticeUtils'
+import { authService, type AuthUser } from './utils/auth'
 
 const router = useRouter()
 const route = useRoute()
 
+// Refs
+const user = ref<AuthUser | null>(null)
 const wrongQuestionsCount = ref(0)
 const showWrongQuestions = ref(false)
 const showMobileMenu = ref(false)
+const showAuth = ref(false)
+const showProfile = ref(false)
+const showUserMenu = ref(false)
+const userMenuRef = ref<HTMLElement>()
 
-// 新增：判断是否为移动端
-const isMobile = ref(window.innerWidth < 768)
-function handleResize() {
-  isMobile.value = window.innerWidth < 768
-  if (!isMobile.value) {
-    showMobileMenu.value = false
+// Methods
+const updateWrongQuestionsCount = async (): Promise<void> => {
+  try {
+    const questions = await getWrongQuestions()
+    wrongQuestionsCount.value = questions.length
+  } catch (error) {
+    console.error('Failed to update wrong questions count:', error)
+    wrongQuestionsCount.value = 0
   }
 }
 
-const updateWrongQuestionsCount = async () => {
-  wrongQuestionsCount.value = (await getWrongQuestions()).length
+const loadUser = async (): Promise<void> => {
+  try {
+    user.value = await authService.getCurrentUser()
+  } catch (error) {
+    console.error('Failed to load user:', error)
+    user.value = null
+  }
 }
 
-const startWrongQuestionsPractice = (questions: any[]) => {
+const handleAuthSuccess = (authUser: AuthUser): void => {
+  user.value = authUser
+  showAuth.value = false
+}
+
+const handleLogout = async (): Promise<void> => {
+  try {
+    await authService.logout()
+    user.value = null
+    showProfile.value = false
+    showUserMenu.value = false
+    showMobileMenu.value = false
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
+}
+
+// Menu toggle methods
+// const toggleUserMenu = (): void => {
+//   showUserMenu.value = !showUserMenu.value
+// }
+
+// const toggleMobileMenu = (): void => {
+//   showMobileMenu.value = !showMobileMenu.value
+// }
+
+// const closeMobileMenu = (): void => {
+//   showMobileMenu.value = false
+// }
+
+// // Modal opening methods
+// const openProfile = (): void => {
+//   showProfile.value = true
+//   showUserMenu.value = false
+// }
+
+// const openProfileFromMobile = (): void => {
+//   showProfile.value = true
+//   showMobileMenu.value = false
+// }
+
+// const openAuthFromMobile = (): void => {
+//   showAuth.value = true
+//   showMobileMenu.value = false
+// }
+
+const openAuthFromWrongQuestions = (): void => {
+  showAuth.value = true
+  showWrongQuestions.value = false
+}
+
+// const openWrongQuestionsFromMobile = (): void => {
+//   showWrongQuestions.value = true
+//   showMobileMenu.value = false
+// }
+
+// Navigation methods
+const startWrongQuestionsPractice = (questions: any[]): void => {
   showWrongQuestions.value = false
   const queryObj = { 
     mode: 'wrong-questions', 
@@ -224,7 +240,7 @@ const startWrongQuestionsPractice = (questions: any[]) => {
   }
 }
 
-const reviewQuestion = (question: any) => {
+const reviewQuestion = (question: any): void => {
   showWrongQuestions.value = false
   const queryObj = { 
     mode: 'review', 
@@ -237,19 +253,30 @@ const reviewQuestion = (question: any) => {
   }
 }
 
-// Initialize wrong questions count
-updateWrongQuestionsCount()
+// Click outside handler
+const handleClickOutside = (event: Event): void => {
+  const target = event.target as HTMLElement
+  
+  // Close user menu if clicking outside
+  if (userMenuRef.value && !userMenuRef.value.contains(target)) {
+    showUserMenu.value = false
+  }
+}
 
-// Set up reactive updates
-onMounted(() => {
-  onWrongQuestionsUpdate(updateWrongQuestionsCount)
-  window.addEventListener('resize', handleResize)
+// Lifecycle hooks
+onMounted(async () => {
+  await loadUser()
+  await updateWrongQuestionsCount()
+  document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
   offWrongQuestionsUpdate(updateWrongQuestionsCount)
-  window.removeEventListener('resize', handleResize)
+  document.removeEventListener('click', handleClickOutside)
+  
 })
+
+onWrongQuestionsUpdate(updateWrongQuestionsCount)
 </script>
 
 <style>
@@ -261,5 +288,16 @@ onUnmounted(() => {
 
 .router-link-active {
   color: #3b82f6;
+}
+
+/* Custom transitions */
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 </style>

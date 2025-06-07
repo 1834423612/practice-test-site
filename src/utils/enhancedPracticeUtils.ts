@@ -15,6 +15,8 @@ export interface WrongQuestion {
     correctAnswer: string
     timestamp: number
     attempts: number
+    is_synced?: boolean
+    sync_time?: string
 }
 
 export interface PracticeProgress {
@@ -34,8 +36,23 @@ export interface SessionStats {
     accuracy: number
 }
 
+export interface CleanedQuestion {
+    external_id: string
+    stem: string
+    stimulus?: string
+    type: string
+    domain: string
+    correct_answer: string[]
+    rationale: string
+    image?: string
+    answerOptions?: Array<{
+        id: string
+        content: string
+    }>
+}
+
 // Helper function to deeply clean question data for IndexedDB storage
-function cleanQuestionForStorage(question: any): any {
+function cleanQuestionForStorage(question: any): CleanedQuestion | null {
     if (!question) return null
 
     try {
@@ -55,22 +72,33 @@ function cleanQuestionForStorage(question: any): any {
 
         const parsed = JSON.parse(serialized)
 
+        // Ensure correct_answer is properly formatted
+        let correctAnswerArray: string[] = []
+        if (Array.isArray(parsed.correct_answer)) {
+            correctAnswerArray = parsed.correct_answer.filter(Boolean).map(String)
+        } else if (parsed.correct_answer) {
+            correctAnswerArray = [String(parsed.correct_answer)]
+        } else {
+            // Fallback: try to get from other fields
+            correctAnswerArray = ["A"] // Default fallback
+        }
+
         // Create a clean copy with only the essential fields
-        const cleanedQuestion: any = {
-            external_id: parsed.external_id || "",
-            stem: typeof parsed.stem === "string" ? parsed.stem : "",
-            stimulus: typeof parsed.stimulus === "string" ? parsed.stimulus : undefined,
-            type: parsed.type || "mcq",
-            domain: parsed.domain || "",
-            correct_answer: Array.isArray(parsed.correct_answer) ? parsed.correct_answer : [parsed.correct_answer || ""],
-            rationale: typeof parsed.rationale === "string" ? parsed.rationale : "",
-            image: typeof parsed.image === "string" ? parsed.image : undefined,
+        const cleanedQuestion: CleanedQuestion = {
+            external_id: String(parsed.external_id || ""),
+            stem: String(parsed.stem || ""),
+            stimulus: parsed.stimulus ? String(parsed.stimulus) : undefined,
+            type: String(parsed.type || "mcq"),
+            domain: String(parsed.domain || ""),
+            correct_answer: correctAnswerArray,
+            rationale: String(parsed.rationale || ""),
+            image: parsed.image ? String(parsed.image) : undefined,
         }
 
         // Clean answer options if they exist
         if (parsed.answerOptions && Array.isArray(parsed.answerOptions)) {
-            (cleanedQuestion as any).answerOptions = parsed.answerOptions
-                .map((option: { id: any; content: any }) => {
+            cleanedQuestion.answerOptions = parsed.answerOptions
+                .map((option: any) => {
                     if (!option || typeof option !== "object") return null
                     return {
                         id: String(option.id || ""),
@@ -85,13 +113,11 @@ function cleanQuestionForStorage(question: any): any {
         console.error("Error cleaning question data:", error)
         // Fallback to minimal data structure
         return {
-            external_id: question.external_id || "",
+            external_id: String(question.external_id || ""),
             stem: String(question.stem || ""),
-            type: question.type || "mcq",
-            domain: question.domain || "",
-            correct_answer: Array.isArray(question.correct_answer)
-                ? question.correct_answer
-                : [question.correct_answer || ""],
+            type: String(question.type || "mcq"),
+            domain: String(question.domain || ""),
+            correct_answer: [String(question.correct_answer?.[0] || question.correct_answer || "A")],
             rationale: String(question.rationale || ""),
         }
     }
@@ -364,37 +390,41 @@ export function checkAnswer(question: any, selectedAnswer: string): boolean {
 // Wrong questions management with reactive updates
 let wrongQuestionsUpdateCallbacks: (() => void)[] = []
 
-export function onWrongQuestionsUpdate(callback: () => void) {
+export function onWrongQuestionsUpdate(callback: () => void): void {
     wrongQuestionsUpdateCallbacks.push(callback)
 }
 
-export function offWrongQuestionsUpdate(callback: () => void) {
+export function offWrongQuestionsUpdate(callback: () => void): void {
     wrongQuestionsUpdateCallbacks = wrongQuestionsUpdateCallbacks.filter((cb) => cb !== callback)
 }
 
-function notifyWrongQuestionsUpdate() {
+function notifyWrongQuestionsUpdate(): void {
     wrongQuestionsUpdateCallbacks.forEach((callback) => callback())
 }
 
-// IndexedDB 存储支持
+// IndexedDB storage support
 let dbPromise: Promise<IDBDatabase>
 
 function openDB(): Promise<IDBDatabase> {
     if (dbPromise) return dbPromise
     dbPromise = new Promise((resolve, reject) => {
-        const request = indexedDB.open("satPracticeDB", 1)
+        const request = indexedDB.open("satPracticeDB", 2) // Increment version for schema changes
         request.onupgradeneeded = () => {
             const db = request.result
+
+            // Create or update wrongQuestions store
             if (!db.objectStoreNames.contains("wrongQuestions")) {
                 db.createObjectStore("wrongQuestions", { keyPath: "externalId" })
             }
+
+            // Create or update questionProgress store
             if (!db.objectStoreNames.contains("questionProgress")) {
                 db.createObjectStore("questionProgress", { keyPath: "questionId" })
             }
         }
         request.onsuccess = () => {
             const db = request.result
-            // 自动迁移一次已有的 localStorage 数据
+            // Auto-migrate existing localStorage data once
             migrateLocalStorageToIDB()
             resolve(db)
         }
@@ -403,19 +433,6 @@ function openDB(): Promise<IDBDatabase> {
     return dbPromise
 }
 
-// function getFromStore(storeName: string, key: string): Promise<any> {
-//     return openDB().then(
-//         (db) =>
-//             new Promise((resolve, reject) => {
-//                 const transaction = db.transaction(storeName, "readonly")
-//                 const store = transaction.objectStore(storeName)
-//                 const req = store.get(key)
-//                 req.onsuccess = () => resolve(req.result)
-//                 req.onerror = () => reject(req.error)
-//             }),
-//     )
-// }
-
 function getAllFromStore(storeName: string): Promise<any[]> {
     return openDB().then(
         (db) =>
@@ -423,7 +440,7 @@ function getAllFromStore(storeName: string): Promise<any[]> {
                 const transaction = db.transaction(storeName, "readonly")
                 const store = transaction.objectStore(storeName)
                 const req = store.getAll()
-                req.onsuccess = () => resolve(req.result)
+                req.onsuccess = () => resolve(req.result || [])
                 req.onerror = () => reject(req.error)
             }),
     )
@@ -468,7 +485,7 @@ function clearStore(storeName: string): Promise<void> {
     )
 }
 
-// 修改错误题目管理：使用 IndexedDB 替代 localStorage
+// Enhanced wrong question management with proper error handling
 export async function getWrongQuestions(): Promise<WrongQuestion[]> {
     try {
         const data = await getAllFromStore("wrongQuestions")
@@ -496,38 +513,70 @@ export async function saveWrongQuestion(question: any, userAnswer: string): Prom
         const wrongQuestions = await getWrongQuestions()
         const existing = wrongQuestions.find((q) => q.externalId === question.external_id)
 
+        // Ensure we have a valid correct answer
+        let correctAnswer = ""
+        if (Array.isArray(question.correct_answer) && question.correct_answer.length > 0) {
+            correctAnswer = String(question.correct_answer[0])
+        } else if (question.correct_answer) {
+            correctAnswer = String(question.correct_answer)
+        } else {
+            // Fallback: try to determine from cleaned question
+            correctAnswer = cleanedQuestion.correct_answer[0] || "A"
+        }
+
         const wrongQuestion: WrongQuestion = {
             externalId: String(question.external_id || ""),
-            question: cleanedQuestion, // Use cleaned question data
+            question: cleanedQuestion,
             userAnswer: String(userAnswer || ""),
-            correctAnswer: String(question.correct_answer?.[0] || ""),
+            correctAnswer: correctAnswer,
             timestamp: Date.now(),
             attempts: existing ? existing.attempts + 1 : 1,
-            id: String(question.external_id || ""), // Use external_id as id for compatibility
+            id: String(question.external_id || ""),
+            is_synced: false, // 新保存的题目标记为未同步
         }
 
         console.log("Final wrong question object:", wrongQuestion)
 
         await setToStore("wrongQuestions", wrongQuestion)
         console.log("Successfully saved wrong question to IndexedDB")
+
+        // 如果用户已登录，尝试立即同步到云端
+        const { authService } = await import("./auth")
+        const { wrongQuestionsSyncService } = await import("./wrongQuestionsSync")
+
+        const user = authService.getUser()
+        if (user) {
+            console.log("User is logged in, attempting immediate sync...")
+            const syncSuccess = await wrongQuestionsSyncService.syncSingleQuestionImmediately(question, userAnswer)
+            if (syncSuccess) {
+                wrongQuestion.is_synced = true
+                wrongQuestion.sync_time = new Date().toISOString()
+                await setToStore("wrongQuestions", wrongQuestion)
+                console.log("Question immediately synced to cloud")
+            }
+        }
+
         notifyWrongQuestionsUpdate()
     } catch (error) {
         console.error("Failed to save wrong question to IndexedDB:", error)
         // Try to save with minimal data as fallback
         try {
-            const minimalWrongQuestion = {
+            const minimalWrongQuestion: WrongQuestion = {
                 externalId: String(question.external_id || Date.now()),
                 question: {
                     external_id: String(question.external_id || ""),
                     stem: String(question.stem || ""),
                     type: String(question.type || "mcq"),
-                    correct_answer: [String(question.correct_answer?.[0] || "")],
+                    domain: String(question.domain || ""),
+                    correct_answer: [String(question.correct_answer?.[0] || question.correct_answer || "A")],
+                    rationale: String(question.rationale || ""),
                 },
                 userAnswer: String(userAnswer || ""),
-                correctAnswer: String(question.correct_answer?.[0] || ""),
+                correctAnswer: String(question.correct_answer?.[0] || question.correct_answer || "A"),
                 timestamp: Date.now(),
                 attempts: 1,
                 id: String(question.external_id || Date.now()),
+                is_synced: false,
             }
             await setToStore("wrongQuestions", minimalWrongQuestion)
             console.log("Saved minimal wrong question data as fallback")
@@ -556,7 +605,7 @@ export async function clearWrongQuestions(): Promise<void> {
     }
 }
 
-// 修改进度管理：使用 IndexedDB 替代 localStorage
+// Enhanced progress management
 export async function saveQuestionProgress(_questionId: string, progress: PracticeProgress): Promise<void> {
     try {
         await setToStore("questionProgress", progress)
@@ -579,7 +628,7 @@ export async function getQuestionProgress(): Promise<Record<string, PracticeProg
     }
 }
 
-// 修改数据导出/导入：基于 IndexedDB 数据
+// Enhanced data export/import with better error handling
 export async function exportWrongQuestions(): Promise<string> {
     try {
         const wrongQuestions = await getAllFromStore("wrongQuestions")
@@ -588,12 +637,12 @@ export async function exportWrongQuestions(): Promise<string> {
             wrongQuestions,
             progress,
             exportDate: new Date().toISOString(),
-            version: "1.1",
+            version: "2.0",
         }
         return JSON.stringify(exportData, null, 2)
     } catch (error) {
         console.error("Failed to export data from IndexedDB:", error)
-        return "{}"
+        return JSON.stringify({ wrongQuestions: [], progress: {}, exportDate: new Date().toISOString(), version: "2.0" })
     }
 }
 
@@ -605,6 +654,12 @@ export async function importWrongQuestions(jsonData: string): Promise<boolean> {
                 // Clean imported question data as well
                 if (item.question) {
                     item.question = cleanQuestionForStorage(item.question)
+                }
+                // Ensure all required fields are present
+                if (!item.correctAnswer && item.question?.correct_answer) {
+                    item.correctAnswer = Array.isArray(item.question.correct_answer)
+                        ? item.question.correct_answer[0]
+                        : item.question.correct_answer
                 }
                 await setToStore("wrongQuestions", item)
             }
@@ -622,6 +677,7 @@ export async function importWrongQuestions(jsonData: string): Promise<boolean> {
     }
 }
 
+// Utility functions
 export function formatTime(seconds: number): string {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
@@ -688,7 +744,7 @@ export function generateStudyRecommendations(domainPerformance: Record<string, a
     return recommendations
 }
 
-// 新增 getSessionStats 导出函数，基于题目对象的 answered 与 isCorrect 属性
+// Session stats calculation
 export function getSessionStats(questions: any[]): SessionStats {
     let answeredQuestions = 0
     let correctAnswers = 0
@@ -709,10 +765,10 @@ export function getSessionStats(questions: any[]): SessionStats {
     }
 }
 
-// 新增：自动将 localStorage 里的数据迁移到 IndexedDB
+// Auto-migrate localStorage data to IndexedDB
 async function migrateLocalStorageToIDB(): Promise<void> {
     try {
-        // 处理错误题目数据
+        // Handle wrong questions data
         const localWrong = localStorage.getItem("sat_wrong_questions")
         if (localWrong) {
             const wrongs: WrongQuestion[] = JSON.parse(localWrong)
@@ -721,11 +777,18 @@ async function migrateLocalStorageToIDB(): Promise<void> {
                 if (w.question) {
                     w.question = cleanQuestionForStorage(w.question)
                 }
+                // Ensure correctAnswer is set
+                if (!w.correctAnswer && w.question?.correct_answer) {
+                    w.correctAnswer = Array.isArray(w.question.correct_answer)
+                        ? w.question.correct_answer[0]
+                        : w.question.correct_answer
+                }
                 await setToStore("wrongQuestions", w)
             }
             localStorage.removeItem("sat_wrong_questions")
         }
-        // 处理问题进度数据
+
+        // Handle question progress data
         const localProgress = localStorage.getItem("sat_question_progress")
         if (localProgress) {
             const progressObj: Record<string, PracticeProgress> = JSON.parse(localProgress)
@@ -736,5 +799,32 @@ async function migrateLocalStorageToIDB(): Promise<void> {
         }
     } catch (error) {
         console.warn("Data migration from localStorage to IndexedDB failed:", error)
+    }
+}
+
+// Mark question as synced
+export async function markQuestionAsSynced(externalId: string): Promise<void> {
+    try {
+        const wrongQuestions = await getWrongQuestions()
+        const question = wrongQuestions.find((q) => q.externalId === externalId)
+        if (question) {
+            question.is_synced = true
+            question.sync_time = new Date().toISOString()
+            await setToStore("wrongQuestions", question)
+            notifyWrongQuestionsUpdate()
+        }
+    } catch (error) {
+        console.error("Failed to mark question as synced:", error)
+    }
+}
+
+// Get unsynced questions
+export async function getUnsyncedQuestions(): Promise<WrongQuestion[]> {
+    try {
+        const allQuestions = await getWrongQuestions()
+        return allQuestions.filter((q) => !q.is_synced)
+    } catch (error) {
+        console.error("Failed to get unsynced questions:", error)
+        return []
     }
 }

@@ -73,7 +73,7 @@
             </div>
         </div>
 
-        <!-- Question Navigation -->
+        <!-- Question Navigation with Sync Status -->
         <div class="flex justify-between items-center">
             <button @click="$emit('go-to-previous')" :disabled="currentQuestionIndex <= 0"
                 class="px-2 py-1 sm:px-4 sm:py-2 bg-gray-100 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 transition-colors duration-200 flex items-center text-xs sm:text-sm">
@@ -83,7 +83,20 @@
             </button>
 
             <div class="text-center">
-                <h2 class="text-lg sm:text-2xl font-bold text-gray-800">Question {{ currentQuestionIndex + 1 }}</h2>
+                <div class="flex items-center justify-center space-x-2">
+                    <h2 class="text-lg sm:text-2xl font-bold text-gray-800">Question {{ currentQuestionIndex + 1 }}</h2>
+                    <!-- Sync Status Indicator -->
+                    <div v-if="showSyncStatus" class="flex items-center">
+                        <Icon v-if="syncStatus === 'synced'" icon="lucide:cloud-check" class="w-4 h-4 text-green-500"
+                            title="Synced to cloud" />
+                        <Icon v-else-if="syncStatus === 'syncing'" icon="lucide:cloud-upload"
+                            class="w-4 h-4 text-blue-500 animate-pulse" title="Syncing to cloud" />
+                        <Icon v-else-if="syncStatus === 'local'" icon="lucide:hard-drive" class="w-4 h-4 text-gray-500"
+                            title="Stored locally only" />
+                        <Icon v-else-if="syncStatus === 'error'" icon="lucide:cloud-off" class="w-4 h-4 text-red-500"
+                            title="Sync failed" />
+                    </div>
+                </div>
                 <p class="text-xs sm:text-sm text-gray-600">{{ currentQuestion.domain || 'General' }}</p>
             </div>
 
@@ -170,16 +183,17 @@
                 Skip Question
             </button>
 
-            <button @click="checkAnswer" :disabled="!localSelectedAnswer"
+            <button @click="checkAnswer" :disabled="!localSelectedAnswer || isCheckingAnswer"
                 class="w-full sm:w-auto px-6 py-2 sm:px-8 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg sm:rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-shadow duration-300 flex items-center justify-center text-sm sm:text-base">
-                <Icon icon="lucide:check-circle" class="mr-2 w-3 h-3 sm:w-4 sm:h-4" />
-                Check Answer
+                <Icon :icon="isCheckingAnswer ? 'lucide:loader-2' : 'lucide:check-circle'"
+                    :class="isCheckingAnswer ? 'animate-spin' : ''" class="mr-2 w-3 h-3 sm:w-4 sm:h-4" />
+                {{ isCheckingAnswer ? 'Checking...' : 'Check Answer' }}
             </button>
         </div>
 
         <!-- Enhanced Answer Explanation -->
         <div v-if="localShowFeedback" class="space-y-4 sm:space-y-6">
-            <!-- Result Banner -->
+            <!-- Result Banner with Sync Status -->
             <div class="rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center"
                 :class="localIsCorrect ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200' : 'bg-gradient-to-r from-red-50 to-pink-50 border border-red-200'">
                 <div class="flex items-center justify-center mb-4">
@@ -197,6 +211,18 @@
                     {{ localIsCorrect ? 'Great job! You got it right.' : 'Don\'t worry, let\'s review the explanation.'
                     }}
                 </p>
+
+                <!-- Sync Status for Wrong Answers -->
+                <div v-if="!localIsCorrect && showSyncStatus" class="mt-3 flex items-center justify-center space-x-2">
+                    <Icon v-if="syncStatus === 'synced'" icon="lucide:cloud-check" class="w-4 h-4 text-green-500" />
+                    <Icon v-else-if="syncStatus === 'syncing'" icon="lucide:cloud-upload"
+                        class="w-4 h-4 text-blue-500 animate-pulse" />
+                    <Icon v-else-if="syncStatus === 'local'" icon="lucide:hard-drive" class="w-4 h-4 text-gray-500" />
+                    <Icon v-else-if="syncStatus === 'error'" icon="lucide:cloud-off" class="w-4 h-4 text-red-500" />
+                    <span class="text-xs text-gray-600">
+                        {{ getSyncStatusText() }}
+                    </span>
+                </div>
             </div>
 
             <!-- MCQ Detailed Explanation -->
@@ -299,6 +325,7 @@
             <p>Local Show Feedback: {{ localShowFeedback }}</p>
             <p>Props Show Feedback: {{ showFeedback }}</p>
             <p>Question ID: {{ currentQuestion?.external_id }}</p>
+            <p>Sync Status: {{ syncStatus }}</p>
         </div>
     </div>
 </template>
@@ -319,6 +346,8 @@ const props = defineProps<{
     showFeedback: boolean
     isCorrect: boolean
     explanation: string
+    syncStatus?: 'synced' | 'syncing' | 'local' | 'error'
+    showSyncStatus?: boolean
     sessionStats: {
         totalQuestions: number
         answeredQuestions: number
@@ -345,33 +374,29 @@ const localShowFeedback = ref(false)
 const localIsCorrect = ref(false)
 const localExplanation = ref('')
 const isLoadingProgress = ref(false)
+const isCheckingAnswer = ref(false)
 
-// 添加清理HTML内容的函数
+// Clean HTML content function
 const cleanQuestionContent = (htmlContent: string): string => {
     if (!htmlContent) return ''
 
-    // 创建一个临时的DOM元素来解析HTML
     const tempDiv = document.createElement('div')
     tempDiv.innerHTML = htmlContent
 
-    // 移除所有带有 sr-only 类的元素（屏幕阅读器专用文本）
     const srOnlyElements = tempDiv.querySelectorAll('.sr-only')
     srOnlyElements.forEach(element => element.remove())
 
-    // 移除所有带有 aria-hidden="true" 且内容为下划线的span元素后面的多余文本
     const ariaHiddenElements = tempDiv.querySelectorAll('span[aria-hidden="true"]')
     ariaHiddenElements.forEach(element => {
-        // 如果下一个兄弟节点是包含"blank"的sr-only元素，也会被上面的代码移除
-        // 这里我们确保下划线显示正确
         if (element.textContent && element.textContent.includes('_')) {
-            // 保持下划线元素不变
+            // Keep underline elements unchanged
         }
     })
 
     return tempDiv.innerHTML
 }
 
-// 添加计算属性来清理题目内容
+// Computed properties for cleaned content
 const cleanedStimulus = computed(() => {
     return cleanQuestionContent(props.currentQuestion.stimulus || '')
 })
@@ -380,7 +405,7 @@ const cleanedStem = computed(() => {
     return cleanQuestionContent(props.currentQuestion.stem || '')
 })
 
-// Enhanced MCQ explanation parser using the new utility
+// Enhanced MCQ explanation parser
 const parsedMCQExplanation = computed(() => {
     if (props.currentQuestion.type !== 'mcq' || !localExplanation.value) return []
 
@@ -397,10 +422,24 @@ const isCorrectOption = (optionId: string): boolean => {
 }
 
 const selectOption = (optionId: string) => {
-    // Only allow selection if feedback is not shown and not currently loading
-    if (!localShowFeedback.value && !isLoadingProgress.value) {
+    if (!localShowFeedback.value && !isLoadingProgress.value && !isCheckingAnswer.value) {
         console.log('Selecting option:', optionId)
         localSelectedAnswer.value = optionId
+    }
+}
+
+const getSyncStatusText = (): string => {
+    switch (props.syncStatus) {
+        case 'synced':
+            return 'Synced to cloud'
+        case 'syncing':
+            return 'Syncing to cloud...'
+        case 'local':
+            return 'Stored locally only'
+        case 'error':
+            return 'Sync failed'
+        default:
+            return ''
     }
 }
 
@@ -467,7 +506,7 @@ watch(localSelectedAnswer, (newValue) => {
     emit('update:selectedAnswer', newValue)
 })
 
-// 监听父组件传入的 props 并同步到本地状态
+// Watch props and sync to local state
 watch(() => props.selectedAnswer, (newValue) => {
     console.log('QuestionArea: selectedAnswer prop changed to', newValue)
     localSelectedAnswer.value = newValue
@@ -488,7 +527,7 @@ watch(() => props.explanation, (newValue) => {
     localExplanation.value = newValue
 }, { immediate: true })
 
-// 监听本地状态变化并向父组件发送更新
+// Watch local state changes and emit to parent
 watch(localShowFeedback, (newValue) => {
     console.log('QuestionArea: localShowFeedback changed to', newValue)
     emit('update:showFeedback', newValue)
@@ -504,17 +543,25 @@ watch(localExplanation, (newValue) => {
     emit('update:explanation', newValue)
 })
 
-// 简化问题变更监听，不再在这里处理状态加载
+// Watch for question changes
 watch(() => props.currentQuestion?.external_id, async (newQuestionId, oldQuestionId) => {
     if (newQuestionId && newQuestionId !== oldQuestionId) {
         console.log('QuestionArea: Question changed from', oldQuestionId, 'to', newQuestionId)
-        // 让父组件完全控制状态，这里不做任何状态重置或加载
+        // Let parent component control state completely
     }
 }, { immediate: true })
 
-const checkAnswer = () => {
+const checkAnswer = async () => {
     console.log('QuestionArea: Check answer clicked with:', localSelectedAnswer.value)
-    emit('check-answer')
+    isCheckingAnswer.value = true
+    try {
+        emit('check-answer')
+    } finally {
+        // Reset checking state after a delay to show feedback
+        setTimeout(() => {
+            isCheckingAnswer.value = false
+        }, 500)
+    }
 }
 
 const skipQuestion = () => {
@@ -525,10 +572,9 @@ const nextQuestion = () => {
     emit('next-question')
 }
 
-// 移除 onMounted 中的状态加载，让父组件完全控制
 onMounted(async () => {
     await nextTick()
-    // 不在这里加载进度，完全依赖父组件传入的 props
+    // Let parent component control all state
 })
 </script>
 
@@ -536,7 +582,6 @@ onMounted(async () => {
 .prose img {
     margin: 1rem auto;
     max-width: none;
-    /* Allow images to be wider than container */
     height: auto;
 }
 
@@ -572,5 +617,36 @@ onMounted(async () => {
 /* Prevent layout shifts from hover effects */
 .overflow-hidden {
     overflow: hidden;
+}
+
+/* Sync status animations */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
 }
 </style>

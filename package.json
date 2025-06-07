@@ -10,12 +10,15 @@
     "fix-amc": "ts-node --loader ts-node/esm fixAMCJson.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.50.0",
     "@tailwindcss/postcss": "^4.1.8",
     "@types/node": "^22.8.7",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.2",
+    "bcryptjs": "^3.0.2",
     "fs": "0.0.1-security",
     "katex": "^0.16.11",
+    "pinia": "^3.0.3",
     "postcss": "^8.5.1",
     "sweetalert2": "^11.12.4",
     "tailwindcss": "^4.1.7",
